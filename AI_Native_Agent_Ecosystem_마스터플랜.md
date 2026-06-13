@@ -20,6 +20,10 @@
 | D8 | RTL 검증 체인 | **Verilator(lint) → Icarus Verilog + cocotb(sim) → Vivado 2024.1 batch mode(synth/timing)** | r/FPGA 현업 컨센서스: 빠른 오픈소스 루프로 1차 검증 후, Vivado tcl 배치로 최종 합성/타이밍 확인. 에이전트는 "주니어 RTL 엔지니어"로서 작은 diff 단위만 수정. |
 | D9 | 골든 모델 검증 | Python/NumPy 참조 모델 (MATLAB 대체) | 라이선스 없는 Python 참조 모델을 cocotb 테스트벤치에서 bit-exact 비교. 형민님의 히스토그램 Checker 같은 ISP 모듈 검증에 그대로 적용 가능. |
 | D10 | 학습 파이프라인 | Zotero(수집) → NotebookLM(1차 정제) → Obsidian wiki(승격) → Claude(생산) | 자료의 "세상의 지식 → raw → wiki → ai 대답" 4단 구조 그대로. 전공/실무 학습을 연구와 같은 파이프라인에 태움. |
+| D19 | 설계 시각화 규약 | **ASCII 다이어그램(커밋 정본)·HTML(설명/발표) 적극 활용**, 이미지 생성·외부도구 비의존. DESIGN.md는 ASCII 블록/데이터플로우 필수, HTML은 Hermes 인라인 렌더링 | git diff 가능성·터미널 열람·토큰 효율(ASCII) + 시각적 풍부함·즉시 피드백(HTML). 보리스 학습기법(4.5-9)과 일관. 상세는 Phase 3-5. |
+| D18 | Vivado 프로젝트 위생 | **r/FPGA 합의 채택**: proj/ git 제외, rtl/cons/sim/ip + rebuild.tcl만 체크인, 에이전트는 non-project batch 모드 기본, 빠른 오픈소스 루프 통과 후에만 Vivado 호출, GUI/ILA 디버깅은 인간 영역 | 현업 워크플로우 합의(AMD ug892·커뮤니티 저장소 교차검증). 에이전트가 프로젝트 junk를 커밋하거나 느린 합성을 남발하는 것을 차단. 상세는 Phase 5-6. |
+| D17 | 프롬프트 저작 표준 | **모든 지시문(CLAUDE/AGENTS/SKILL/커맨드)에 5대 요소 + XML 구조 + Final Reminder 적용**, 반복개선 루프를 복리 엔지니어링과 통합, `/prompt-review` 게이트 | Anthropic 프롬프팅 워크숍. 지시문 품질이 전체 시스템 출력 품질의 상한을 정함. XML로 지시·데이터 분리해 컨텍스트 오염 방지. 상세는 Phase 3-4. |
+| D16 | 보리스식 학습·검증 화법 | **적대적 검증 프롬프팅**("증명해"·"심문해")을 표준 화법으로, **`/learn` 간격반복 스킬**로 연구·학습 통합, Explanatory 출력 스타일 상시. 마인드: vanilla 셋업·검증 우선·복리 엔지니어링 | 보리스 2월 스레드 + 1월 스레드 마인드. 형민님의 꾸준한 전공/실무 학습 목표를 시스템에 내장. 상세는 Phase 4.5-7~10. |
 | D15 | 영상 소스 소비 | **YouTube는 25% 도구 버킷 하위**로 분류. B티어(Jeff Su·Tina Huang)만 정기, C는 pull 방식, D(수익화·도구쫓기·영상제작)는 제외. 주 1편 time-box + 승격필터 엄격 적용 | 영상은 정보밀도 낮고 시간 흡수 큼. 도메인 깊이(60%)를 잠식하지 않게 push 구독 대신 pull 소비. 상세는 Phase 6.5-5~6. |
 | D14 | 스킬 패키징 구조 | **marketplace + plugin 계층 구조 채택** (phuryn/pm-skills 패턴): skills=명사(자동 로드)/commands=동사(체이닝), 검증 스크립트 + progressive disclosure. 단 PM 콘텐츠 자체는 선별 이식만 | 흩어진 ~/.claude/skills보다 git 버전관리·재사용·이식이 쉬운 구조. SaaS/웹 PM 스킬 대부분은 형민님 도메인과 무관하므로 전체 설치 대신 4종만 발췌. 상세는 Phase 5.5. |
 | D13 | 정보 식단 | **도메인 전문가 60% / 도구 활용 25% / 방향성 15%** 비중. Tier S(ZipCPU·Verbeure·Cummings)를 수집 파이프라인의 상시 입력원으로 고정, 오락성 계정은 파이프라인 제외 | AI 도구 활용법은 휘발성이 높고 RTL 설계 관점은 경력 전체를 떠받침. 특히 Verbeure는 ISP 연구 주제가 직접 겹침. 상세는 Phase 6.5. |
@@ -247,6 +251,7 @@ Read `MY.md` first. 사용자는 FPGA(DPR/ISP/Vitis AI) 연구자. 한국어로 
 3. RTL 코드는 `01_Context/standards.md` 준수. 검증 리포트 없이 완료 선언 금지.
 4. 미검증 결과를 단정 표현으로 쓰지 말 것 ("시뮬레이션 수준에서 확인됨" 등 명시).
 5. 토큰 절약: 하위 폴더는 각 폴더의 sub-CLAUDE.md(인덱스)를 먼저 읽고 필요 파일만 연다.
+6. 설계를 시각화할 때는 **ASCII 다이어그램(커밋 대상 문서)과 HTML(설명·발표용)을 적극 사용**한다 (Phase 3-5 규약).
 
 ## Natural Language Commands (한국어 트리거 → 영어 명령)
 - "옵시디언에 저장해줘" → /save : 5대 필터 검사 후 wiki 또는 raw에 저장 + log.md 갱신
@@ -307,6 +312,69 @@ status: active | tool: Vivado 2024.1 | board: AMD <보드명>
 ## Risks / Don't Repeat
 - (실패 사례 기록 — lint 필터 5번 항목)
 ```
+
+### 3-4. 프롬프트 작성 표준 (Anthropic 워크숍 기반) — 모든 지시문의 공통 규격
+
+CLAUDE.md·AGENTS.md·SKILL.md·슬래시 커맨드·/rtl-spec 출력까지, **시스템 안의 모든 지시문은 아래 규격으로 쓴다.** Anthropic의 프롬프팅 워크숍 원칙을 시스템 저작 표준으로 고정한 것이다.
+
+**5대 구성 요소** (복잡한 작업일수록 다섯 개를 모두 채운다):
+1. **Persona/Role** — Claude가 어떤 전문가로 행동할지 (예: "Vivado 2024.1 합성 가능 Verilog에 능숙한 시니어 RTL 엔지니어")
+2. **Task** — 무엇을 할지 1~2문장으로 구체·간결하게
+3. **Context/Dynamic Content** — 처리할 데이터·문서·표준. 외부 데이터는 영역을 명확히 구분해 입력
+4. **Step-by-step Instructions** — 수행 순서를 단계로 (chain-of-thought 유도). "먼저 표준을 읽고, 그 다음 구현하고, 마지막에 lint" 식 명시적 순서
+5. **Constraints/Examples/Final Reminder** — 출력 형식(표/JSON), 지켜야 할 규칙, few-shot 예시 1~2개, 그리고 가장 중요한 규칙을 끝에 한 번 더
+
+**핵심 기법**:
+- **XML 태그 > 마크다운**: `<instructions>`, `<context>`, `<documents>` 등으로 영역을 나누면 경계가 명확하고 토큰 효율이 좋으며, **지시사항이 외부 데이터에 희석되는 현상을 막는다**. (라우팅 테이블·DESIGN.md 섹션도 XML로 구조화)
+- **불필요한 정보 제거**: 결과에 영향 없는 서술은 삭제 — 모델 주의력 분산 방지. (CLAUDE.md ≤300줄 원칙과 같은 결)
+- **어조 지정**: "사실 기반, 미검증은 단정하지 않는 어조" — 형민님의 연구 원칙을 프롬프트 차원에서도 강제
+- **Few-shot**: 원하는 출력 예시 1~2개만 줘도 품질이 크게 오른다
+
+**반복 개선 루프 = 복리 엔지니어링과 통합**: 한 번에 완벽을 노리지 말고 [초안 → 결과 평가 → 결함 식별 → 제약 추가 → 재실행]. **반복되는 실수는 그 자리에서 CLAUDE.md/Final Reminder에 규칙으로 박는다** — 이것이 Phase 4.5-10의 복리 엔지니어링과 동일한 루프다. 즉 프롬프트 개선과 시스템 진화가 한 동작이다.
+
+**FPGA RTL 생성 프롬프트 템플릿** (5요소 + XML 적용 예 — `05_Resources/prompt-standards.md`에 저장):
+```xml
+<persona>너는 Vivado 2024.1 합성 가능 Verilog에 능숙한 시니어 RTL 엔지니어다.</persona>
+<task>아래 명세에 따라 히스토그램 Checker 모듈 하나만 구현한다.</task>
+<context>
+  <standards>@01_Context/standards.md</standards>
+  <design_spec>@04_Projects/fpga-adaptive-isp/DESIGN.md</design_spec>
+</context>
+<instructions>
+  1. 먼저 standards와 design_spec을 읽는다.
+  2. checker 모듈만 작성한다 (작은 diff, 한 모듈).
+  3. make lint를 실행해 경고 0까지 자가 수정한다.
+</instructions>
+<constraints>
+  - Verilog-2001 합성 서브셋, 동기 active-high 리셋.
+  - model/checker_model.py 기준 cocotb bit-exact 통과 필수.
+</constraints>
+<final_reminder>lint 통과 없이 완료 선언 금지. 미검증 결과를 단정하지 말 것.</final_reminder>
+```
+
+**`/prompt-review` 커맨드 신설** (hm-knowledge 플러그인): 작성한 프롬프트/지시문을 받아 5대 요소 누락·XML 구조·모호성·노이즈를 점검하고 개선안을 제시. CLAUDE.md나 새 SKILL.md를 만들 때 통과 게이트로 쓴다.
+
+### 3-5. 설계 시각화 출력 규약 — ASCII & HTML 우선
+
+설계 내용(아키텍처·모듈 계층·데이터플로우·FSM·파이프라인·버스 타이밍 등)을 시각 자료로 만들 때, 에이전트는 **ASCII 다이어그램과 HTML을 기본 수단으로 적극 활용**한다. 이미지 생성이나 외부 도구에 의존하지 않는다.
+
+**언제 ASCII를 쓰는가 — "커밋되는 정본(canonical) 문서"**
+- 대상: DESIGN.md의 블록 다이어그램·데이터플로우, PROJECT.md, wiki 노트, RTL 코드 주석, FSM 상태 전이, 파이프라인 스테이지, AXI/ICAP 핸드셰이크 타이밍(ASCII 파형)
+- 이유: git으로 diff·버전관리 가능, 어떤 에디터·터미널에서도 열람, 바이너리 없음, 토큰 효율적. **설계의 단일 진실 출처에 적합.**
+- 예:
+```
+        ┌──────────┐  hist[255:0]  ┌──────────┐  mode  ┌──────────────┐
+  pixel→│ Histogram │──────────────▶│ Checker  │───────▶│ PR Controller│
+        │  Builder  │               │ 40%/20%  │ trigger│   → ICAP      │
+        └──────────┘               └──────────┘        └──────────────┘
+```
+
+**언제 HTML을 쓰는가 — "설명·발표·탐색용"**
+- 대상: 낯선 코드/IP 코어 설명 자료, 합성 리포트 대시보드(WNS·utilization 시각화), 시뮬 파형 뷰, 학습 슬라이드(/learn), 인터랙티브 모듈 다이어그램
+- 이유: 시각적 풍부함, **Hermes 워크스페이스 탭에서 인라인 렌더링**, 마음에 안 들면 그 자리서 스크린샷 피드백 → 즉시 수정(보리스식 검증 루프)
+- 운영: 정본은 ASCII로 repo에 남기고, HTML은 그 정본을 설명·발표하기 위한 파생물로 다룬다(일회성이면 00_raw에).
+
+**규칙 요약**: 정본 설계 문서 = ASCII(diff 가능), 설명·발표 = HTML(렌더링). 두 형식 모두 Phase 3-4의 XML 구조·"미검증 단정 금지" 원칙을 그대로 따른다. 이 규약은 /rtl-spec, /learn, Docs Agent, Phase 8 대시보드 전반에 적용된다.
 
 ---
 
@@ -492,6 +560,58 @@ git worktree add ../fpga-isp-wt-prctrl   fix/pr-controller-timing
 ```
 각 세션이 독립 작업 트리를 가지므로 서로 간섭 없이 병렬 진행 → 완료된 쪽부터 머지. 보리스 팀이 "단일 최대 생산성 향상"으로 꼽은 기법이다.
 
+### 4.5-7. 2차 스레드(Feb) 추가 운영 기법 — FPGA 번역
+
+1월 스레드(4.5-1~6) 이후 공개된 보리스의 추가 팁 중, 기존에 없던 것만 형민님 환경으로 옮긴다.
+
+| 보리스 추가 팁 | FPGA/연구 적용 |
+|----------------|----------------|
+| worktree에 셸 별칭(za/zb/zc)으로 한 키 이동 + 전용 "analysis" worktree(로그/쿼리 전용) | `.bashrc`에 `alias wr='cd ~/ai-os/projects/.../wt-rtl'` 식 별칭. **읽기 전용 analysis worktree** 신설 — Vivado 합성/타이밍 로그와 cocotb 파형만 읽고 코드는 건드리지 않는 세션 |
+| 계획을 한 Claude가 쓰고, 두 번째 Claude가 "스태프 엔지니어"로 리뷰 | /rtl-spec로 DESIGN.md 초안 작성 후, **별도 세션의 Claude(또는 Codex)에게 "시니어 검증 엔지니어로서 이 설계의 허점을 잡아라"** 리뷰시키고 /rtl-impl 진입 |
+| 일이 틀어지면 밀어붙이지 말고 plan mode로 돌아가 재계획 | /rtl-impl가 두 번 헛돌면 즉시 plan mode 복귀. "검증 단계에도 plan mode를 쓴다" → cocotb 테스트 전략도 계획 모드로 먼저 설계 |
+| 작업/프로젝트별 notes 디렉터리를 PR마다 갱신, CLAUDE.md가 그곳을 가리킴 | 우리의 PROJECT.md + Decisions Log가 이 역할. **머지/검증 통과 시마다 갱신**을 규칙으로 (4.5-10 마인드와 연결) |
+| 하루 한 번 이상 하는 일은 전부 커맨드화. 세션 끝에 `/techdebt`로 중복 코드 제거 | `/rtl-cleanup` 커맨드 신설: 세션 종료 시 중복 RTL 로직·미사용 신호·dead code 점검. hm-fpga 플러그인에 편입 |
+| 버그는 Claude가 대부분 자가 수정: 로그 스레드 붙이고 "fix", "CI 고쳐" 식으로 마이크로매니징 안 함 | 시뮬 실패 로그/합성 에러를 붙이고 "고쳐". 단 **Phase 5의 3회 실패 시 인간 보고 가드 유지** — 하드웨어는 웹앱과 달리 무한 자동수정이 위험 |
+| Ghostty 터미널, `/statusline`(컨텍스트 사용량+git 브랜치 표시), tmux 탭=worktree | `/statusline`로 컨텍스트 잔량·브랜치 상시 표시(긴 합성 세션에서 유용). tmux 탭을 worktree별로 |
+| "use subagents"로 더 많은 연산 투입 + 권한요청 훅을 강한 모델로 라우팅해 안전한 것 자동 승인 | 대규모 sweep에 "use subagents" 부착. 권한 훅: `make lint/sim`은 자동 승인, `vivado`/`push`는 인간에게(4.5-4와 결합) |
+
+### 4.5-8. 보리스식 프롬프팅 — 적대적 검증 화법 (마인드 ①)
+
+보리스의 핵심 프롬프팅 철학은 **Claude를 협력자가 아니라 나를 시험하는 리뷰어로 세우는 것**이다. 형민님의 "미검증은 단정 금지" 원칙과 정확히 같은 방향이라, 표준 화법으로 채택한다.
+
+- **"이 변경을 깐깐하게 심문하고, 내가 네 테스트를 통과하기 전엔 PR 만들지 마."** → Claude가 검토자가 되어 형민님 설계를 방어하게 만든다.
+- **"이게 동작한다는 걸 증명해."** → RTL이라면: main 브랜치와 feature 브랜치의 시뮬레이션 출력을 골든모델 기준으로 diff해 등가성을 입증하게 한다.
+- 어설픈 수정이 나오면 **"지금 아는 걸 전부 반영해서, 이건 버리고 가장 우아한 방식으로 다시 구현해."** → 누적된 임시방편을 리셋.
+- 작업 위임 전 **모호함을 줄이고 상세 명세를 준다** → 이미 /rtl-spec의 역할.
+
+### 4.5-9. 보리스식 학습 모드 — 연구하며 배우는 장치 (형민님 핵심 니즈)
+
+보리스의 학습 활용법은 형민님의 "FPGA/임베디드/전자 전공·실무를 꾸준히 학습" 목표에 직결된다. 별도 학습 도구를 만들 필요 없이 Claude Code 안에서 연구와 학습을 한 흐름으로 묶는다.
+
+- **`/config`에서 "Explanatory" 또는 "Learning" 출력 스타일 켜기** → Claude가 변경의 *이유*까지 설명. 낯선 IP 코어나 Vitis AI 흐름을 다룰 때 상시 켠다.
+- **낯선 코드의 시각적 HTML 설명 자료 생성** → 처음 보는 reference design, DPU 드라이버, ICAP 예제를 "HTML 슬라이드로 설명해줘"로 빠르게 파악. Hermes 워크스페이스 탭에서 인라인 렌더링.
+- **새 프로토콜·코드베이스의 ASCII 다이어그램** → AXI 핸드셰이크, ICAP 재구성 시퀀스, DPU 데이터플로우를 ASCII로 그리게 해 구조를 즉시 이해. 그대로 wiki 노트에 첨부. (시각화 형식 선택 기준은 Phase 3-5 규약 — 정본은 ASCII, 설명용은 HTML)
+- **간격반복(spaced-repetition) 학습 스킬 `/learn` 신설** (이번 반영의 최대 수확): 형민님이 한 개념(예: 부분 재구성 비트스트림 흐름)에 대한 *자신의 이해를 설명*하면 → Claude가 빈틈을 찾는 후속 질문 → 정리 결과를 `03_Intelligence`에 저장하고 복습 주기를 기록. **연구 중 마주친 개념이 곧바로 검증된 wiki 지식이 되는 능동 학습 루프.**
+
+```
+/learn 흐름:
+1. 나: "부분 재구성 비트스트림이 ICAP로 로드되는 과정을 내가 이해한 대로 설명할게..."
+2. Claude: 설명의 빈틈/오개념을 짚는 질문 3개
+3. 나: 답변 → Claude가 교정 + 정리 노트 생성
+4. 03_Intelligence/fpga/에 저장 + 02_Daily에 복습 예정일 기록
+5. (주간 루틴에서 복습 큐 점검)
+```
+
+### 4.5-10. 보리스의 마인드셋 요약 (마인드 ②)
+
+도구 설정보다 중요한 태도. 시스템 전반에 깔아두는 기본 자세다.
+
+1. **셋업은 의외로 vanilla** — 과도한 커스터마이징보다 기본기에 충실. 정답은 없고, 직접 실험해 자신에게 맞는 방식을 찾는다. (우리 계획의 스킬/훅도 *필요할 때* 추가하지 미리 쌓지 않는다 — '실수 3·4' 회피와 일치)
+2. **검증 피드백 루프가 품질의 전부** — Claude에게 스스로 검증할 수단을 주면 결과 품질이 2~3배. 그래서 Phase 5(bit-exact+합성)에 가장 많이 투자한다.
+3. **복리 엔지니어링(Compounding Engineering)** — 모든 교정을 즉시 CLAUDE.md 규칙으로 박아 실수율을 측정 가능하게 떨어뜨린다. 매주 CLAUDE.md를 무자비하게 다듬는다.
+4. **계획 > 구현** — 에너지를 계획에 쏟아 한 번에 구현되게 한다. 틀어지면 밀어붙이지 말고 재계획.
+5. **병렬이 최대 생산성 지렛대** — worktree로 여러 작업을 동시에. 단 하드웨어 검증·머지는 인간 게이트 유지.
+
 ---
 
 ## Phase 4.6. 루프 엔지니어링 — 프롬프트에서 루프로 (보리스 2단계 진화, 2026.5)
@@ -520,9 +640,10 @@ Claude Code의 /loop는 프롬프트를 주기 실행한다(최대 3일 무인 �
 /loop 매주 일요일: 00_raw/clippings 미처리 파일을 /ingest 기준으로 분류하고
       승격 후보 목록을 만들어 내 승인을 기다려.
 
-/loop 격일: r/FPGA, AMD 블로그, zipcpu.com, tomverbeure.github.io,
-      Anthropic Engineering에서 DPR/ISP/검증 관련 새 글을 검색해
-      03_Intelligence에 한 줄 요약 + 링크로 적재. (소스 기준: Phase 6.5)
+/loop 야간(매일 새벽 02시): r/FPGA, AMD 블로그, zipcpu.com,
+      tomverbeure.github.io, Anthropic Engineering에서 DPR/ISP/검증 관련
+      새 글을 검색해 03_Intelligence에 한 줄 요약 + 링크로 적재.
+      → 문헌 모니터링 루프는 야간에 수행한다 (소스 기준: Phase 6.5).
 ```
 
 Phase 6-4의 cron 헤드리스 스크립트는 /loop가 흡수할 수 있다 — /loop가 더 단순하면 그쪽으로 통일한다.
@@ -569,10 +690,16 @@ r/FPGA 현업 컨센서스를 그대로 구현한다: **"AI는 주니어 RTL 엔
 ├── rtl/                      # Verilog 소스 (checker.v, pr_controller.v ...)
 ├── model/                    # Python 골든 모델 (checker_model.py ...)
 ├── tb/                       # cocotb 테스트벤치
+├── cons/                     # XDC 제약 파일 (체크인) — r/FPGA 표준 구조
+├── ip/                        # Xilinx IP (.xci 등 일부만 체크인, 생성물 제외)
+├── sim/                       # 시뮬 파일셋 소스 (체크인)
 ├── synth/
 │   ├── synth.tcl             # Vivado batch 합성 스크립트
+│   ├── rebuild.tcl           # write_project_tcl 산출물 (상대경로, 체크인)
 │   └── reports/              # timing_summary.rpt, utilization.rpt
-└── Makefile                  # lint / sim / synth 타깃
+├── proj/                      # Vivado 프로젝트 디렉터리 — git 제외(.gitignore)
+├── .gitignore                # proj/, *.jou, *.log, .Xil/ 등 제외
+└── Makefile                  # lint / sim / synth / export 타깃
 ```
 
 ### 5-2. Makefile — 에이전트가 누르는 버튼
@@ -585,6 +712,8 @@ sim:
 	$(MAKE) -C tb TOPLEVEL=$(TOP) MODULE=test_$(TOP)   # cocotb 표준 흐름
 synth:
 	vivado -mode batch -source synth/synth.tcl -tclargs $(TOP) | tee synth/last_run.log
+export:
+	vivado -mode batch -source synth/export_rebuild.tcl   # write_project_tcl → rebuild.tcl (규칙 3)
 report:
 	@grep -A5 "Design Timing Summary" synth/reports/timing_summary.rpt || true
 	@grep -E "Slice LUTs|DSPs|Block RAM" synth/reports/utilization.rpt || true
@@ -621,7 +750,7 @@ async def bit_exact_vs_golden(dut):
 보리스 비법 #7에 따라 프로젝트 내 `.claude/commands/<name>.md`로 만들어 git에 체크인한다. 각 커맨드의 핵심 지시문:
 
 **`/rtl-spec`** (Prompt Enhancer 역할)
-> 사용자의 자연어 요구를 받아 DESIGN.md를 생성/갱신한다. 반드시 포함: 입출력 포트 표, cycle budget, 목표 클록(MHz), DSP/BRAM 매핑 힌트, 골든 모델 정의, 통과 조건(타이밍 슬랙 ≥ 0, bit-exact). 모호한 항목은 사용자에게 질문 후 확정.
+> 사용자의 자연어 요구를 받아 DESIGN.md를 생성/갱신한다. **출력은 Phase 3-4의 5요소+XML 표준을 따른다.** 반드시 포함: 입출력 포트 표, **ASCII 블록 다이어그램 + 데이터플로우(Phase 3-5 규약)**, cycle budget, 목표 클록(MHz), DSP/BRAM 매핑 힌트, 골든 모델 정의, 통과 조건(타이밍 슬랙 ≥ 0, bit-exact). 모호한 항목은 사용자에게 질문 후 확정.
 
 **`/rtl-impl`** (RTL Generator)
 > **반드시 Plan mode(shift+tab 두 번)로 시작해 구현 계획을 먼저 합의받은 뒤** auto-accept로 전환해 구현한다(보리스 비법 #6). DESIGN.md와 01_Context/standards.md를 읽고 rtl/에 코드를 작성한다. **한 번에 하나의 파이프라인 스테이지/모듈만 수정 (작은 diff)**. 수정 후 즉시 `make lint` 실행, 경고가 0이 될 때까지 자체 반복.
@@ -645,6 +774,43 @@ async def bit_exact_vs_golden(dut):
 
 익숙해지면 "spec부터 synth까지 쭉 진행해, 단 synth 적용 전엔 멈춰"로 묶어 반자율 운행한다. **완전 자율(인간 0 개입)은 의도적으로 막아둔다** — 연구 신뢰성이 우선.
 
+
+### 5-6. r/FPGA 현업 워크플로우 → 에이전트 규칙 (커뮤니티 합의 내재화)
+
+r/FPGA의 워크플로우·불만·로드맵 스레드들이 반복해서 말하는 현업 합의를, 에이전트가 어기지 못하도록 규칙으로 박는다. (Reddit 스레드 내용은 AMD ug892 문서와 다수 커뮤니티 저장소로 교차 검증.)
+
+**규칙 1 — Vivado 프로젝트는 git에 넣지 않는다 (최대 합의).** Vivado 프로젝트 폴더는 절대 경로로 가득 차 이동 불가하고, 95%가 합성·캐시 산출물이다. 에이전트는 `proj/`를 절대 커밋하지 않는다. 체크인 대상은 `rtl/`, `cons/`, `sim/`, 선별된 `ip/`, 그리고 재생성용 `rebuild.tcl`뿐. 프로젝트용 `.gitignore`를 둔다:
+```gitignore
+proj/
+*.jou
+*.log
+*.str
+.Xil/
+*.cache/
+*.hw/
+*.sim/
+*.runs/
+```
+
+**규칙 2 — 에이전트는 항상 non-project(batch) 모드로 구동한다.** 재현성과 CI를 위해 모든 합성·시뮬은 tcl 배치(`vivado -mode batch -source ...`). 이미 Phase 5의 기본 흐름이다. GUI 프로젝트 모드는 **인간이 ILA(통합 로직 분석기)·핀 플래닝·온보드 디버깅**을 할 때만 연다 — 에이전트는 하드웨어를 직접 프로빙할 수 없으므로 이 영역을 침범하지 않는다.
+
+**규칙 3 — `rebuild.tcl` 재생성 규율 (`/vivado-export` 커맨드 신설).** GUI에서 프로젝트(블록 디자인·IP 설정 등)를 바꿨다면, 에이전트가 `write_project_tcl`로 `rebuild.tcl`을 다시 만들고 **상대 경로로 교정**(`set origin_dir [file dirname [info script]]`)한 뒤 커밋한다. 이로써 "다른 PC/worktree에서 한 번에 프로젝트 복원"이 보장된다. hm-fpga 플러그인에 편입.
+
+**규칙 4 — 빠른 오픈소스 루프를 먼저, Vivado는 마지막에 (frustration 대응).** r/FPGA 최대 불만은 합성·구현이 느려 반복이 굼뜨다는 것. 에이전트는 **Verilator lint → cocotb bit-exact를 모두 통과시킨 뒤에만** 느린 Vivado 배치를 호출한다. 미통과 상태로 합성을 돌려 인간의 시간·컴퓨트를 낭비하는 것을 금지(standards.md에 명문화). 이미 Phase 5 게이트가 이 순서지만, "왜"를 규칙에 박아 에이전트가 지름길로 합성부터 돌리지 못하게 한다.
+
+**규칙 5 — 타이밍 클로저는 진단까지만 자동, 수정은 제안.** 또 다른 공통 불만인 타이밍 클로저는 `/rtl-synth`가 WNS·실패 경로를 분석하고 파이프라인 단 추가 등 *제안*까지만. 적용은 인간 승인(Phase 5-4 원칙 유지).
+
+`/vivado-export` 커맨드 골격:
+```bash
+# proj/ 에서 프로젝트를 연 뒤 tcl 콘솔/배치로:
+vivado -mode batch -source - <<'TCL'
+open_project proj/fpga-adaptive-isp.xpr
+write_project_tcl -force -no_copy_sources -paths_relative_to . synth/rebuild.tcl
+TCL
+# 이후 에이전트가 rebuild.tcl의 절대경로 잔재를 상대경로로 점검·교정 후 git add
+```
+
+> 학습 로드맵 스레드의 함의도 반영: 입문자는 "툴 사용법"보다 **작은 모듈을 끝까지(설계→시뮬→합성→온보드) 완주**하는 경험이 핵심이라는 합의. `/learn`(4.5-9)과 `/rtl-*` 루프가 바로 이 "작게, 끝까지" 완주를 매번 강제하는 구조다.
 
 ---
 
@@ -676,6 +842,7 @@ phuryn/pm-skills(68 스킬·42 커맨드의 PM 마켓플레이스)를 검토해,
 - **플러그인 간 하드 참조 금지** — 다른 플러그인의 커맨드를 직접 부르지 말고 자연어로 후속 제안("이제 합성해볼까요?"). 플러그인은 독립 설치되므로 하드 참조는 깨진다.
 - **Progressive disclosure** — frontmatter(항상 로드)는 최소화, 세부는 SKILL.md 본문(트리거 시 로드)에. 토큰 절약과 직결.
 - **skill의 name = 디렉터리명** 일치 필수. frontmatter는 skill=name+description, command=description+argument-hint.
+- **모든 SKILL.md/커맨드 본문은 Phase 3-4의 프롬프트 표준(5요소+XML+Final Reminder)으로 작성**한다. `/prompt-review`로 검수 후 커밋.
 
 설치:
 ```bash
@@ -777,6 +944,8 @@ crontab -e    # 추가: 매일 08:30 실행
 ```
 
 이것이 자료의 '실수 2(실시간 컨텍스트 미갱신)'에 대한 해법 — 헤드리스 모드 스케줄링이다. (시스템이 안정화되면 Phase 4.6-2의 /loop로 대체·통일 가능.)
+
+> 학습 파이프라인 보강: 연구 중 개념 학습은 Phase 4.5-9의 보리스식 `/learn`(간격반복)·Explanatory 스타일·ASCII/HTML 설명 기법을 함께 쓴다. 수집→정제→승격(이 Phase)과 능동학습(/learn)이 한 wiki에서 만난다.
 
 ---
 
@@ -898,7 +1067,7 @@ npm install && npm run build   # 저장소 안내에 따라 조정
    - `#codex-impl` (Codex, fpga-adaptive-isp) — 구현 전담
    - `#librarian` (Hermes 무료 모델) — 대용량 문서 1차 요약 (토큰 0원)
 2. **Obsidian Memory Layer 연결**: Hermes 설정에서 메모리 경로를 `~/ai-os/vault`로 지정 → 모든 에이전트가 MY.md/연구 맥락을 세션마다 자동 공유. 배경 설명 반복 입력이 사라진다.
-3. **워크스페이스 탭 활용**: `graph.html`, 합성 리포트, 히스토그램 SVG, 시뮬레이션 파형 캡처를 대시보드 안에서 인라인 렌더링 → 마음에 안 들면 그 자리에서 스크린샷 피드백 → 초고속 수정 루프.
+3. **워크스페이스 탭 활용**: `graph.html`, 합성 리포트(HTML 대시보드), 설계 설명 HTML(Phase 3-5), 히스토그램 SVG, 시뮬레이션 파형 캡처를 대시보드 안에서 인라인 렌더링 → 마음에 안 들면 그 자리에서 스크린샷 피드백 → 초고속 수정 루프.
 4. **영구 세션**: 재부팅해도 에이전트별 대화 이력이 유지되므로, 프로젝트별 세션을 "상주 팀원"처럼 운영한다.
 5. **병렬 운용 원칙**(보리스 비법 #1·#2): 동시 RTL 작업은 반드시 git worktree로 격리(4.5-6). 합성 대기 같은 긴 작업은 웹 세션으로 `&` 핸드오프하거나, 폰에서 시작한 세션을 `--teleport`로 이어받는다 — 대시보드 밖에서도 워크플로우가 끊기지 않게.
 
@@ -956,7 +1125,7 @@ systemctl --user enable --now syncthing   # http://localhost:8384
 | 마감 | PROJECT.md Now/Next 갱신 확인 (에이전트가 했는지 검수) |
 | 상시 | **Claude가 실수하면 그 즉시 "방금 실수를 CLAUDE.md 규칙으로 추가해줘"** — 살아있는 CLAUDE.md (보리스 비법 #4, 복리 엔지니어링) |
 
-### 주간 루틴 (금요일 30분)
+### 주간 루틴 (목요일 기준, 30분)
 1. `/lint` 실행 → 중복·노후 정보 청소 ('실수 5' 방지)
 1b. 진행 중 연구 가정에 `assumption-redteam` 1회 — 이번 주 가장 싼 검증 1건 도출 (Phase 5.5-2)
 2. `/graphify wiki` 재실행 → 고립 노드 점검
@@ -985,11 +1154,12 @@ systemctl --user enable --now syncthing   # http://localhost:8384
 | Day | Phase | 산출물 |
 |-----|-------|--------|
 | 1 | 1~2 | Ubuntu 검증, 디렉터리 골격, RTL 툴체인, Obsidian+Zotero |
-| 2 | 2~3 | 핵심 컨텍스트 5종, CLAUDE.md/AGENTS.md/PROJECT.md |
+| 2 | 2~3 | 핵심 컨텍스트 5종, CLAUDE.md/AGENTS.md/PROJECT.md, 프롬프트 작성 표준(3-4) |
 | 2~3 | 4~4.5 | Claude Code, Codex, second-brain 스킬, agent-os + 보리스식 운영체계(커맨드 git화, 훅, 권한, worktree) |
 | 4주차+ | 4.6 | (검증 게이트 안정화 후) /loop 야간 회귀, Routines 문헌 모니터링, 동적 워크플로우 도입 |
 | 3~5 | 5 | Makefile, cocotb 골든모델 게이트, /rtl-* 스킬 4종, 첫 닫힌 루프 가동 |
 | 5 | 5.5 | hm-skills 마켓플레이스 구조화, 연구용 PM 스킬 4종 이식, /research-check |
+| 5 | 5-6 | Vivado git 위생(.gitignore·rebuild.tcl), /vivado-export, batch 모드 규칙 |
 | 5~6 | 6 | 웹클리퍼, /ingest /query /lint, notebooklm-py, cron 브리핑 |
 | 6 | 6.5 | 정보 식단 구축: Tier S RSS/Zotero 구독, 학습 로드맵 등록 |
 | 6 | 7 | Graphify 3D 그래프 |
@@ -1021,5 +1191,8 @@ systemctl --user enable --now syncthing   # http://localhost:8384
 - 스킬 패키징/사고도구: phuryn/pm-skills (Paweł Huryn) — marketplace+plugin 아키텍처, skills=명사/commands=동사, strategy-red-team·create-prd·prioritization-frameworks·intended-vs-implemented 이식 (Phase 5.5)
 - 영상 소스 트리아지: YouTube 채널 8선 검토분(2026.6) — Jeff Su/Tina Huang(B), Liam Ottley·Nate Herk·Silicon Valley Girl(C), Nick Saraev·Chase H. AI·Itssssss_Jack(D), 소비 규율 (Phase 6.5-5~6)
 - 정보 식단/전문가 큐레이션: ChatGPT 대화 검토분(2026.6) — FPGA/임베디드 전문가 Tier 분류, Karpathy Software 3.0/vibe coding/agentic engineering, 학습 3축 모델 (Phase 6.5)
+- FPGA 현업 워크플로우: r/FPGA 워크플로우·불만·로드맵 스레드(2026.6 검토), AMD ug892 design-flows, 커뮤니티 git 저장소(jhallen/vivado_setup·zackheil/base-soc 등)로 교차검증 — Vivado git 위생·batch 모드·rebuild.tcl·빠른 루프 우선 (Phase 5-6)
+- 프롬프트 저작 표준: Anthropic 프롬프팅 워크숍 3세션(Prompting 101 5.12, Prompt Engineering 6.13, Building with Claude 6.12) — 5대 요소·XML 구조화·반복 개선 (Phase 3-4)
+- 보리스 추가 비법·마인드: Boris Cherny X 2026.2.1 스레드(병렬 별칭·적대적 프롬프팅·학습 모드·서브에이전트·터미널) + 1월 스레드 마인드셋 (Phase 4.5-7~10)
 - 루프 엔지니어링: Boris Cherny 2026.5 Sequoia 인터뷰 ("내 일은 루프를 쓰는 것", /loop·Routines·dynamic workflows, Phase 4.6) — @AnatoliKopadze 게시물 계열의 원출처
 - FPGA 에이전트 참고: Fabrinetes(도커 환경), FPGA-Agent, verilog-generator, AMD agentic AI 블로그

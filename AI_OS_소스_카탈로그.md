@@ -52,6 +52,7 @@
 | **Karpathy LLM wiki** (원본 자료) | 지식 승격 철학 | 세상의 지식→raw→wiki→AI 대답, 5대 승격 필터 | Phase 2-3 raw/wiki 분리 규칙 |
 | **Matt Pocock (AI Hero)** | 소프트웨어 공학 관점 | "AI가 코딩을 대신하는 게 아니라, 좋은 공학이 더 중요해졌다" | 검증·아키텍처 우선 철학 보강 |
 | **r/FPGA 에이전트 논의** (원본 자료) | 현업 컨센서스 | AI=주니어 RTL 엔지니어, 골든모델 bit-exact, 합성 리포트 피드백 | Phase 5 검증 루프의 직접 근거 |
+| **r/FPGA 워크플로우 스레드** (2026.6) | 현업 워크플로우 합의 | Vivado git 위생(proj/ 제외·rebuild.tcl), batch 모드, 빠른 루프 우선, 타이밍 클로저 | Phase 5-6 에이전트 규칙 |
 
 ---
 
@@ -144,7 +145,7 @@ AI Agent 환경을 연구 밖으로 키울 때, **이미 검토했지만 지금�
 | 8 | Graphify | A2 | 3D 지식그래프 |
 | 9 | agent-os | A3 | 프로젝트 표준 학습 |
 | 10 | phuryn/pm-skills | A3 | 스킬 패키징 패턴·사고도구 |
-| 11 | Boris Cherny (13비법·루프) | B | Claude Code 운영 규율 |
+| 11 | Boris Cherny (1·2월 스레드·5월 루프) | B | Claude Code 운영 규율·학습/검증 마인드 |
 | 12 | Andrej Karpathy | B/C | AI 패러다임·문제 분해 |
 | 13 | Ben AI 6대 실수 | B | 세컨드 브레인 함정 |
 | 14 | Karpathy LLM wiki | B | 지식 승격 철학 |
