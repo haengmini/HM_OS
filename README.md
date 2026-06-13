@@ -4,9 +4,9 @@
 
 ## 포함 문서
 
-- [AI Native OS reference zip.md](./AI%20Native%20OS%20reference%20zip.md)
-- [AI_Native_Agent_Ecosystem_마스터플랜_1.md](./AI_Native_Agent_Ecosystem_%EB%A7%88%EC%8A%A4%ED%84%B0%ED%94%8C%EB%9E%9C_1.md)
-- [AI_OS_소스_카탈로그.md](./AI_OS_%EC%86%8C%EC%8A%A4_%EC%B9%B4%ED%83%88%EB%A1%9C%EA%B7%B8.md)
+- [AI Native OS reference zip.md](./AI%20Native%20OS%20reference%20zip.md) : Obsidian, Graphify, 웹 클리퍼, 참고 링크를 모은 원자료 메모
+- [AI_Native_Agent_Ecosystem_마스터플랜_1.md](./AI_Native_Agent_Ecosystem_%EB%A7%88%EC%8A%A4%ED%84%B0%ED%94%8C%EB%9E%9C_1.md) : AI Agent OS의 전체 아키텍처와 구축 단계가 정리된 마스터플랜
+- [AI_OS_소스_카탈로그.md](./AI_OS_%EC%86%8C%EC%8A%A4_%EC%B9%B4%ED%83%88%EB%A1%9C%EA%B7%B8.md) : 도구, 프레임워크, 학습 소스를 콘텐츠 성격과 기능으로 분류한 카탈로그
 
 ## 목적
 
