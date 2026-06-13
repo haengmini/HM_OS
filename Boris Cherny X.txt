@@ -1,0 +1,143 @@
+Boris Cherny X Feb 1
+
+I'm Boris and I created Claude Code. I wanted to quickly share a few tips for using Claude Code, sourced directly from the Claude Code team. The way the team uses Claude is different than how I use it. Remember: there is no one right way to use Claude Code -- everyones' setup is different. You should experiment to see what works for you!
+
+1. Do more in parallel
+
+Spin up 3–5 git worktrees at once, each running its own Claude session in parallel. It's the single biggest productivity unlock, and the top tip from the team. Personally, I use multiple git checkouts, but most of the Claude Code team prefers worktrees -- it's the reason 
+@amorriscode
+ built native support for them into the Claude Desktop app!
+
+Some people also name their worktrees and set up shell aliases (za, zb, zc) so they can hop between them in one keystroke. Others have a dedicated "analysis" worktree that's only for reading logs and running BigQuery
+
+See https://code.claude.com/docs/en/common-workflows#run-parallel-claude-code-sessions-with-git-worktrees
+
+2. Start every complex task in plan mode. Pour your energy into the plan so Claude can 1-shot the implementation.
+
+One person has one Claude write the plan, then they spin up a second Claude to review it as a staff engineer. 
+
+Another says the moment something goes sideways, they switch back to plan mode and re-plan. Don't keep pushing. They also explicitly tell Claude to enter plan mode for verification steps, not just for the build
+
+3. Invest in your http://CLAUDE.md. After every correction, end with: "Update your http://CLAUDE.md so you don't make that mistake again." Claude is eerily good at writing rules for itself.
+
+Ruthlessly edit your http://CLAUDE.md over time. Keep iterating until Claude's mistake rate measurably drops.
+
+One engineer tells Claude to maintain a notes directory for every task/project, updated after every PR. They then point http://CLAUDE.md at it.
+
+4. Create your own skills and commit them to git. Reuse across every project.
+
+Tips from the team:
+- If you do something more than once a day, turn it into a skill or command
+- Build a /techdebt slash command and run it at the end of every session to find and kill duplicated code
+- Set up a slash command that syncs 7 days of Slack, GDrive, Asana, and GitHub into one context dump
+- Build analytics-engineer-style agents that write dbt models, review code, and test changes in dev
+
+Learn more: https://code.claude.com/docs/en/skills#extend-claude-with-skills
+
+5. Claude fixes most bugs by itself. Here's how we do it:
+
+Enable the Slack MCP, then paste a Slack bug thread into Claude and just say "fix." Zero context switching required.
+
+Or, just say "Go fix the failing CI tests." Don't micromanage how.
+
+Point Claude at docker logs to troubleshoot distributed systems -- it's surprisingly capable at this.
+
+6. Level up your prompting
+
+a. Challenge Claude. Say "Grill me on these changes and don't make a PR until I pass your test." Make Claude be your reviewer.  Or, say "Prove to me this works" and have Claude diff behavior between main and your feature branch
+
+b. After a mediocre fix, say: "Knowing everything you know now, scrap this and implement the elegant solution"
+
+c. Write detailed specs and reduce ambiguity before handing work off. The more specific you are, the better the output
+
+7. Terminal & Environment Setup
+
+The team loves Ghostty! Multiple people like its synchronized rendering, 24-bit color, and proper unicode support.
+
+For easier Claude-juggling, use /statusline to customize your status bar to always show context usage and current git branch. Many of us also color-code and name our terminal tabs, sometimes using tmux — one tab per task/worktree. 
+
+Use voice dictation. You speak 3x faster than you type, and your prompts get way more detailed as a result. (hit fn x2 on macOS)
+
+More tips: https://code.claude.com/docs/en/terminal-config
+
+8. Use subagents
+
+a. Append "use subagents" to any request where you want Claude to throw more compute at the problem
+
+b. Offload individual tasks to subagents to keep your main agent's context window clean and focused
+
+c. Route permission requests to Opus 4.5 via a hook — let it scan for attacks and auto-approve the safe ones (see https://code.claude.com/docs/en/hooks#permissionrequest)
+
+9. Use Claude for data & analytics
+
+Ask Claude Code to use the "bq" CLI to pull and analyze metrics on the fly. We have a BigQuery skill checked into the codebase, and everyone on the team uses it for anlytics queries directly in Claude Code. Personally, I haven't written a line of SQL in 6+ months.
+
+This works for any database that has a CLI, MCP, or API.
+
+10. Learning with Claude
+
+A few tips from the team to use Claude Code for learning:
+
+a. Enable the "Explanatory" or "Learning" output style in /config to have Claude explain the *why* behind its changes
+
+b. Have Claude generate a visual HTML presentation explaining unfamiliar code. It makes surprisingly good slides!
+
+c. Ask Claude to draw ASCII diagrams of new protocols and codebases to help you understand them
+
+d. Build a spaced-repetition learning skill: you explain your understanding, Claude asks follow-ups to fill gaps, stores the result
+
+---
+
+Boris Cherny X Jan 3
+
+I'm Boris and I created Claude Code. Lots of people have asked how I use Claude Code, so I wanted to show off my setup a bit.
+
+My setup might be surprisingly vanilla! Claude Code works great out of the box, so I personally don't customize it much. There is no one correct way to use Claude Code: we intentionally build it in a way that you can use it, customize it, and hack it however you like. Each person on the Claude Code team uses it very differently.
+
+So, here goes.
+
+1/ I run 5 Claudes in parallel in my terminal. I number my tabs 1-5, and use system notifications to know when a Claude needs input https://code.claude.com/docs/en/terminal-config#iterm-2-system-notifications
+
+2/ I also run 5-10 Claudes on http://claude.ai/code, in parallel with my local Claudes. As I code in my terminal, I will often hand off local sessions to web (using &), or manually kick off sessions in Chrome, and sometimes I will --teleport back and forth. I also start a few sessions from my phone (from the Claude iOS app) every morning and throughout the day, and check in on them later.
+
+3/ I use Opus 4.5 with thinking for everything. It's the best coding model I've ever used, and even though it's bigger & slower than Sonnet, since you have to steer it less and it's better at tool use, it is almost always faster than using a smaller model in the end.
+
+4/ Our team shares a single http://CLAUDE.md for the Claude Code repo. We check it into git, and the whole team contributes multiple times a week. Anytime we see Claude do something incorrectly we add it to the http://CLAUDE.md, so Claude knows not to do it next time.
+
+Other teams maintain their own http://CLAUDE.md's. It is each team's job to keep theirs up to date.
+
+5/ During code review, I will often tag @.claude on my coworkers' PRs to add something to the http://CLAUDE.md as part of the PR. We use the Claude Code Github action (/install-github-action) for this. It's our version of @danshipper's Compounding Engineering
+
+6/ Most sessions start in Plan mode (shift+tab twice). If my goal is to write a Pull Request, I will use Plan mode, and go back and forth with Claude until I like its plan. From there, I switch into auto-accept edits mode and Claude can usually 1-shot it. A good plan is really important!
+
+7/ I use slash commands for every "inner loop" workflow that I end up doing many times a day. This saves me from repeated prompting, and makes it so Claude can use these workflows, too. Commands are checked into git and live in .claude/commands/.
+
+For example, Claude and I use a /commit-push-pr slash command dozens of times every day. The command uses inline bash to pre-compute git status and a few other pieces of info to make the command run quickly and avoid back-and-forth with the model (https://code.claude.com/docs/en/slash-commands#bash-command-execution)
+
+8/ I use a few subagents regularly: code-simplifier simplifies the code after Claude is done working, verify-app has detailed instructions for testing Claude Code end to end, and so on. Similar to slash commands, I think of subagents as automating the most common workflows that I do for most PRs.
+
+https://code.claude.com/docs/en/sub-agents
+
+9/ We use a PostToolUse hook to format Claude's code. Claude usually generates well-formatted code out of the box, and the hook handles the last 10% to avoid formatting errors in CI later.
+
+10/ I don't use --dangerously-skip-permissions. Instead, I use /permissions to pre-allow common bash commands that I know are safe in my environment, to avoid unnecessary permission prompts. Most of these are checked into .claude/settings.json and shared with the team.
+
+11/ Claude Code uses all my tools for me. It often searches and posts to Slack (via the MCP server), runs BigQuery queries to answer analytics questions (using bq CLI), grabs error logs from Sentry, etc. The Slack MCP configuration is checked into our .mcp.json and shared with the team.
+
+12/ For very long-running tasks, I will either (a) prompt Claude to verify its work with a background agent when it's done, (b) use an agent Stop hook to do that more deterministically, or (c) use the ralph-wiggum plugin (originally dreamt up by 
+@GeoffreyHuntley
+). I will also use either --permission-mode=dontAsk or --dangerously-skip-permissions in a sandbox to avoid permission prompts for the session, so Claude can cook without being blocked on me.
+
+https://github.com/anthropics/claude-plugins-official/tree/main/plugins/ralph-wiggum
+
+https://code.claude.com/docs/en/hooks-guide
+
+13/ A final tip: probably the most important thing to get great results out of Claude Code -- give Claude a way to verify its work. If Claude has that feedback loop, it will 2-3x the quality of the final result.
+
+Claude tests every single change I land to http://claude.ai/code using the Claude Chrome extension. It opens a browser, tests the UI, and iterates until the code works and the UX feels good.
+
+Verification looks different for each domain. It might be as simple as running a bash command, or running a test suite, or testing the app in a browser or phone simulator. Make sure to invest in making this rock-solid.
+
+https://code.claude.com/docs/en/chrome
+
+
