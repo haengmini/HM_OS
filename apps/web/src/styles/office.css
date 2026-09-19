@@ -164,3 +164,64 @@ body {
   font-size: 0.8rem;
   margin: 0;
 }
+
+.hm-os-update-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #1e293b;
+  border-bottom: 2px solid #3b82f6;
+  color: var(--hm-os-text);
+  font-size: 0.85rem;
+}
+
+.hm-os-update-banner button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 2px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+}
+
+.hm-os-main-nav { display: flex; gap: 6px; }
+.hm-os-main-nav button, .hm-os-file-toolbar button, .hm-os-file-upload,
+.hm-os-file-editor-header button {
+  border: 1px solid var(--hm-os-panel-border); background: #0f172a;
+  color: var(--hm-os-text); padding: 6px 10px; font-family: inherit; cursor: pointer;
+}
+.hm-os-main-nav button[aria-pressed='true'] { border-color: #3b82f6; color: #60a5fa; }
+.hm-os-control-panel { border: 2px solid var(--hm-os-panel-border); background: var(--hm-os-panel-bg); padding: 12px; min-height: 65vh; }
+.hm-os-control-panel > header { display: flex; justify-content: space-between; align-items: center; }
+.hm-os-control-panel h2 { margin: 0 0 10px; }
+.hm-os-terminal-host { height: calc(65vh - 45px); background: #020617; padding: 6px; }
+.hm-os-file-toolbar { display: flex; gap: 6px; margin-bottom: 8px; }
+.hm-os-file-upload input { display: none; }
+.hm-os-file-layout { display: grid; grid-template-columns: minmax(220px, 32%) 1fr; gap: 10px; height: calc(65vh - 90px); }
+.hm-os-file-list { list-style: none; margin: 0; padding: 0; overflow: auto; border: 1px solid var(--hm-os-panel-border); }
+.hm-os-file-list li { display: flex; align-items: center; border-bottom: 1px solid #334155; }
+.hm-os-file-list button, .hm-os-file-list a { color: var(--hm-os-text); background: transparent; border: 0; padding: 7px; cursor: pointer; text-decoration: none; }
+.hm-os-file-entry { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hm-os-file-editor { display: flex; flex-direction: column; min-width: 0; }
+.hm-os-file-editor-header { display: flex; justify-content: space-between; align-items: center; min-height: 34px; }
+.hm-os-file-editor textarea { flex: 1; resize: none; background: #020617; color: #e2e8f0; border: 1px solid var(--hm-os-panel-border); padding: 10px; font: 13px/1.45 'Courier New', monospace; }
+.hm-os-control-message { color: #eab308; margin: 4px 0; font-size: .8rem; }
+
+@media (max-width: 600px) {
+  .hm-os-pixel-office-header { flex-wrap: wrap; gap: 8px; }
+  .hm-os-main-nav { order: 3; width: 100%; }
+  .hm-os-main-nav button { flex: 1; }
+  .hm-os-file-layout { grid-template-columns: 1fr; height: auto; }
+  .hm-os-file-list { max-height: 30vh; }
+  .hm-os-file-editor textarea { min-height: 38vh; }
+  .hm-os-terminal-host { height: 68vh; }
+}
