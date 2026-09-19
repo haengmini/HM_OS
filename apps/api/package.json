@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@hm-os/contracts": "*",
+    "@node-rs/argon2": "^2.2.1",
+    "@fastify/cookie": "^11.1.2",
     "fastify": "^5.1.0",
     "@fastify/websocket": "^11.0.1"
   },

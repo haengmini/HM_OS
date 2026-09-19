@@ -1,27 +1,34 @@
 import Fastify from 'fastify';
+import cookie from '@fastify/cookie';
+import { loadConfig } from './config.js';
+import { registerAuthModule } from './routes/auth.js';
 
 /**
- * Milestone 0: minimal health-check server only.
- * Milestone 1 adds auth guards (Tailscale identity + PIN) in front of
- * every route below `/healthz`. Milestone 2+ add status/read-model,
- * terminal, and file routes.
+ * Milestone 1: health check + full auth module (Tailscale identity +
+ * PIN + session/lock). Milestone 2+ adds status/read-model, terminal,
+ * and file routes behind the same guards.
  */
 export function buildServer() {
   const app = Fastify({ logger: false });
+  const config = loadConfig();
+
+  app.register(cookie);
 
   app.get('/healthz', async () => ({
     status: 'ok',
     service: 'hm-os-api',
-    milestone: 'M0',
+    milestone: 'M1',
   }));
 
-  return app;
+  const { sessionStore, pinStore } = registerAuthModule(app, config);
+
+  return { app, config, sessionStore, pinStore };
 }
 
 const isMain = process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
 
 if (isMain) {
-  const app = buildServer();
+  const { app } = buildServer();
   const port = Number(process.env.PORT ?? 8767);
   // Loopback-only bind, per docs/architecture/SECURITY.md.
   app

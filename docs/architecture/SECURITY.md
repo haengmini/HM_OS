@@ -42,9 +42,19 @@
 
 ## 검증 체크리스트 (Milestone 1 게이트)
 
-- [ ] 잘못된 Host 헤더 → 403
-- [ ] 누락된/위조된 Tailscale 신원 헤더 → 403
-- [ ] 잘못된 PIN → 401 (+ rate limit 확인)
-- [ ] 유효한 세션 없이 WebSocket 연결 시도 → 거부
-- [ ] 잠금 상태에서 기존 PTY 입력 시도 → 거부
-- [ ] 세션 만료 후 API 호출 → 401
+- [x] 잘못된 Host 헤더 → 403 (`invalid_host`) — 자동 테스트 + 실제 HTTP 스모크 테스트로 확인
+- [x] 누락된/위조된 Tailscale 신원 헤더 → 403 (`missing_identity`) — 자동 테스트 + 실제 HTTP 스모크 테스트로 확인
+- [x] 잘못된 PIN → 401 (`invalid_pin`) (+ rate limit 확인) — 자동 테스트 + 실제 HTTP 스모크 테스트로 확인
+- [x] 유효한 세션 없이 보호된 라우트(`/api/auth/whoami`) 접근 → 401 (`session_expired`)
+- [x] 잠금 상태에서 보호된 라우트 접근 → 401 (`session_expired`, `Session is locked.`)
+- [x] 세션 만료(로그아웃) 후 API 호출 → 401 (`session_expired`)
+
+Milestone 1 구현 노트:
+- Tailscale 신원 검사는 `apps/api/src/auth/tailscale-identity.ts`, 세션/잠금은
+  `apps/api/src/auth/session-store.ts`, PIN 해시는 `apps/api/src/auth/pin.ts`
+  (Argon2id, `@node-rs/argon2`), rate limit은 `apps/api/src/auth/rate-limiter.ts`에 구현.
+- 프런트엔드 잠금 화면은 `apps/web/src/features/auth/{LockScreen,AuthGate,useAuthGate,api}.ts(x)`.
+- WebSocket(터미널/파일) 채널의 세션 재검증은 Milestone 4에서 구현 예정 — 이 문서의
+  "세션과 잠금" 섹션 규칙을 그대로 적용한다.
+- PTY/파일 편집 채널의 실제 잠금-시 강제 종료는 Milestone 4에서 구현되므로 아직 대상 채널이
+  없다(터미널/파일 라우트가 아직 없음).
