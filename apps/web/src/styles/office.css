@@ -1,0 +1,166 @@
+/* Milestone 3: 2D pixel office base styles. Deliberately simple flat
+   colors + squared corners for a "pixel" feel without needing sprite
+   assets yet; a later visual pass can layer in real pixel art without
+   changing the DOM structure or data flow here. */
+
+:root {
+  --hm-os-bg: #0f172a;
+  --hm-os-panel-bg: #1e293b;
+  --hm-os-panel-border: #334155;
+  --hm-os-text: #e2e8f0;
+  --hm-os-text-dim: #94a3b8;
+  font-family: 'Courier New', ui-monospace, monospace;
+}
+
+body {
+  margin: 0;
+  background: var(--hm-os-bg);
+  color: var(--hm-os-text);
+}
+
+.hm-os-pixel-office {
+  min-height: 100vh;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.hm-os-pixel-office-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.hm-os-pixel-office-header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+}
+
+.hm-os-connection-badge {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 2px;
+  border: 1px solid var(--hm-os-panel-border);
+  color: var(--hm-os-text-dim);
+}
+
+.hm-os-connection-badge[data-connection-state='open'] {
+  color: #22c55e;
+  border-color: #22c55e;
+}
+
+.hm-os-connection-badge[data-connection-state='closed'] {
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.hm-os-pixel-office-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.hm-os-room-panel {
+  background: var(--hm-os-panel-bg);
+  border: 2px solid var(--hm-os-panel-border);
+  border-radius: 4px;
+  padding: 12px;
+  min-height: 160px;
+}
+
+.hm-os-room-panel-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+
+.hm-os-room-panel-header h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.hm-os-room-panel-title {
+  font-size: 0.7rem;
+  color: var(--hm-os-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hm-os-room-panel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 8px;
+}
+
+.hm-os-room-panel-empty {
+  color: var(--hm-os-text-dim);
+  font-size: 0.8rem;
+  grid-column: 1 / -1;
+}
+
+.hm-os-agent-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border: 1px solid var(--tile-color, var(--hm-os-panel-border));
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--tile-color, #334155) 15%, var(--hm-os-panel-bg));
+  text-align: center;
+}
+
+.hm-os-agent-tile-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 2px;
+  background: var(--tile-color, var(--hm-os-panel-border));
+  image-rendering: pixelated;
+}
+
+.hm-os-agent-tile-label {
+  font-size: 0.7rem;
+  font-weight: bold;
+  word-break: break-word;
+}
+
+.hm-os-agent-tile-state {
+  font-size: 0.65rem;
+  color: var(--hm-os-text-dim);
+}
+
+.hm-os-agent-tile-detail {
+  font-size: 0.6rem;
+  color: var(--hm-os-text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.hm-os-lock-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hm-os-bg);
+  color: var(--hm-os-text);
+}
+
+.hm-os-lock-screen form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px;
+  border: 2px solid var(--hm-os-panel-border);
+  border-radius: 4px;
+  background: var(--hm-os-panel-bg);
+  min-width: 260px;
+}
+
+.hm-os-lock-screen-error {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin: 0;
+}
