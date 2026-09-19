@@ -37,4 +37,27 @@ describe('spawnPtySession (real PTY, not mocked)', () => {
     expect(() => session.resize(120, 40)).not.toThrow();
     session.kill();
   });
+
+  it('interrupts a long-running command with Ctrl+C and remains usable', async () => {
+    const session = spawnPtySession({ cwd: tmpdir(), cols: 80, rows: 24, shell: '/bin/bash' });
+    let output = '';
+    session.onData((data) => { output += data; });
+    session.write('sleep 30\r');
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    session.write('\x03');
+    session.write('echo HM_OS_AFTER_INTERRUPT\r');
+
+    await new Promise<void>((resolve, reject) => {
+      const deadline = setTimeout(() => reject(new Error(`PTY interrupt output timed out: ${output}`)), 5_000);
+      const check = setInterval(() => {
+        if (output.includes('HM_OS_AFTER_INTERRUPT')) {
+          clearInterval(check);
+          clearTimeout(deadline);
+          resolve();
+        }
+      }, 20);
+    });
+    expect(output).toContain('HM_OS_AFTER_INTERRUPT');
+    session.kill();
+  }, 10_000);
 });

@@ -11,6 +11,7 @@ export class FileServiceError extends Error {
       | 'not_a_directory'
       | 'not_a_file'
       | 'already_exists'
+      | 'conflict'
       | 'too_large'
       | 'io_error',
     message: string,
@@ -73,7 +74,7 @@ export class FileService {
     return { path: normalized, entries };
   }
 
-  async read(relativePath: string): Promise<{ path: string; content: string; truncated: boolean; sizeBytes: number }> {
+  async read(relativePath: string): Promise<{ path: string; content: string; truncated: boolean; sizeBytes: number; mtimeMs: number }> {
     const { absolutePath, relativePath: normalized } = this.resolve(relativePath);
     let s;
     try {
@@ -88,7 +89,7 @@ export class FileService {
     const truncated = s.size > MAX_READ_BYTES;
     const buffer = await readFile(absolutePath);
     const content = buffer.subarray(0, MAX_READ_BYTES).toString('utf8');
-    return { path: normalized, content, truncated, sizeBytes: s.size };
+    return { path: normalized, content, truncated, sizeBytes: s.size, mtimeMs: s.mtimeMs };
   }
 
   /** Raw byte read for downloads — no truncation, no UTF-8 decoding. */
@@ -120,11 +121,18 @@ export class FileService {
     }
   }
 
-  async write(relativePath: string, content: string): Promise<void> {
+  async write(relativePath: string, content: string, expectedMtimeMs?: number): Promise<void> {
     const { absolutePath } = this.resolve(relativePath);
     try {
+      if (expectedMtimeMs !== undefined) {
+        const current = await stat(absolutePath);
+        if (Math.abs(current.mtimeMs - expectedMtimeMs) > 0.001) {
+          throw new FileServiceError('conflict', `${relativePath} changed since it was opened.`);
+        }
+      }
       await writeFile(absolutePath, content, 'utf8');
     } catch (err) {
+      if (err instanceof FileServiceError) throw err;
       throw this.translateFsError(err, absolutePath);
     }
   }

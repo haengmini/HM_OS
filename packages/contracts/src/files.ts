@@ -25,6 +25,7 @@ export interface ReadFileResult {
   content: string;
   truncated: boolean;
   sizeBytes: number;
+  mtimeMs: number;
 }
 
 export interface FileOperationError {
@@ -34,6 +35,7 @@ export interface FileOperationError {
     | 'not_a_directory'
     | 'not_a_file'
     | 'already_exists'
+    | 'conflict'
     | 'too_large'
     | 'io_error';
   message: string;

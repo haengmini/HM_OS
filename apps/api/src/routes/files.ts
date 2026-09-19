@@ -10,6 +10,7 @@ const ERROR_STATUS: Record<FileServiceError['reason'], number> = {
   not_a_directory: 400,
   not_a_file: 400,
   already_exists: 409,
+  conflict: 409,
   too_large: 413,
   io_error: 500,
 };
@@ -65,12 +66,12 @@ export function registerFileRoutes(
     },
   );
 
-  app.post<{ Body: { path: string; content: string } }>(
+  app.post<{ Body: { path: string; content: string; expectedMtimeMs?: number } }>(
     '/api/files/write',
     { preHandler: [sessionGuard(sessionStore)] },
     async (req, reply) => {
       try {
-        await fileService.write(req.body.path, req.body.content);
+        await fileService.write(req.body.path, req.body.content, req.body.expectedMtimeMs);
         await auditLog.record({ action: 'file_write', sessionId: req.hmOsSessionId!, targetPath: req.body.path });
         return { ok: true };
       } catch (err) {

@@ -12,6 +12,7 @@ export function FileExplorer() {
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [content, setContent] = useState('');
+  const [selectedMtimeMs, setSelectedMtimeMs] = useState<number | undefined>();
   const [message, setMessage] = useState('');
 
   async function refresh(path = cwd) {
@@ -38,6 +39,7 @@ export function FileExplorer() {
       const result = await readTextFile(entry.path);
       setSelected(result.path);
       setContent(result.content);
+      setSelectedMtimeMs(result.mtimeMs);
       setMessage(result.truncated ? '2MiB까지만 표시됩니다.' : '');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : '파일을 읽지 못했습니다.');
@@ -46,8 +48,14 @@ export function FileExplorer() {
 
   async function save() {
     if (!selected) return;
-    await writeTextFile(selected, content);
-    setMessage('저장됨');
+    try {
+      await writeTextFile(selected, content, selectedMtimeMs);
+      const refreshed = await readTextFile(selected);
+      setSelectedMtimeMs(refreshed.mtimeMs);
+      setMessage('저장됨');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : '저장하지 못했습니다.');
+    }
   }
 
   async function mkdir() {
@@ -69,7 +77,7 @@ export function FileExplorer() {
   async function remove(entry: FileEntry) {
     if (!window.confirm(`${entry.name}을(를) 삭제할까요?`)) return;
     await deletePath(entry.path);
-    if (selected === entry.path) { setSelected(null); setContent(''); }
+    if (selected === entry.path) { setSelected(null); setContent(''); setSelectedMtimeMs(undefined); }
     await refresh();
   }
 

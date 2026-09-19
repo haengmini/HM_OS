@@ -18,9 +18,9 @@
 
 ## 현재 상태
 
-V1 Milestone 5 운영 배포 완료 — PM2로 API·userspace Tailscale daemon을 관리하고,
+V1 `v0.1.0` 완료 — PM2로 API·userspace Tailscale daemon을 관리하고,
 `https://hm-os-server.taila8b4a0.ts.net`에서 tailnet-only HTTPS PWA로 제공한다.
-Milestone 6 통합 검증 및 `v0.1.0` 릴리스 후보 작업 중.
+릴리스 노트: [`docs/releases/v0.1.0.md`](./docs/releases/v0.1.0.md).
 
 ## 개발
 

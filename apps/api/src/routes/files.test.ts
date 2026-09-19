@@ -90,6 +90,23 @@ describe('GET/POST /api/files/*', () => {
     expect(read.json().content).toBe('# New note from HTTP');
   });
 
+  it('returns 409 when a stale editor tries to overwrite a newer file', async () => {
+    const opened = await app.inject({
+      method: 'GET', url: '/api/files/read?path=notes%2Fexisting.md',
+      headers: { ...tailscaleHeaders(), cookie },
+    });
+    const mtimeMs = opened.json().mtimeMs;
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    await writeFile(path.join(filesRoot, 'notes', 'existing.md'), '# external change');
+    const staleWrite = await app.inject({
+      method: 'POST', url: '/api/files/write',
+      headers: { ...tailscaleHeaders(), cookie },
+      payload: { path: 'notes/existing.md', content: '# stale write', expectedMtimeMs: mtimeMs },
+    });
+    expect(staleWrite.statusCode).toBe(409);
+    expect(staleWrite.json().reason).toBe('conflict');
+  });
+
   it('rejects a path-escape attempt with 403', async () => {
     const response = await app.inject({
       method: 'GET',

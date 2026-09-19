@@ -19,11 +19,11 @@ export function readTextFile(path: string) {
   return api<ReadFileResult>(`/api/files/read?path=${encodeURIComponent(path)}`);
 }
 
-export function writeTextFile(path: string, content: string) {
+export function writeTextFile(path: string, content: string, expectedMtimeMs?: number) {
   return api<{ ok: true }>('/api/files/write', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ path, content }),
+    body: JSON.stringify({ path, content, expectedMtimeMs }),
   });
 }
 

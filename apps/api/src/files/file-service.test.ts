@@ -33,6 +33,19 @@ describe('FileService', () => {
     expect(result.truncated).toBe(false);
   });
 
+  it('detects a concurrent modification using the expected mtime', async () => {
+    root = await mkdtemp(path.join(tmpdir(), 'hm-os-files-'));
+    const service = new FileService(root);
+    await service.write('conflict.txt', 'first');
+    const opened = await service.read('conflict.txt');
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    await service.write('conflict.txt', 'changed elsewhere');
+    await expect(
+      service.write('conflict.txt', 'stale editor write', opened.mtimeMs),
+    ).rejects.toMatchObject({ reason: 'conflict' });
+    expect((await service.read('conflict.txt')).content).toBe('changed elsewhere');
+  });
+
   it('rejects reading a path that escapes the root', async () => {
     root = await mkdtemp(path.join(tmpdir(), 'hm-os-files-'));
     const service = new FileService(root);
