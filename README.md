@@ -3,6 +3,14 @@
 이형민의 서버 중심 개인 운영체제(Personal OS) — 2D 픽셀 오피스로 실제 서버·Agent OS·지식
 베이스 상태를 보여주고, Tailscale + PIN 인증 뒤 현재 서버를 직접 제어하는 비공개 PWA.
 
+## 바로 사용
+
+1. 개인 PC에서 Tailscale에 로그인한다.
+2. **https://hm-os-server.taila8b4a0.ts.net** 을 연다.
+3. 최초 PIN을 설정하고 브라우저의 **앱 설치** 버튼을 누른다.
+
+자세한 안내: [`docs/operations/QUICK_START.md`](./docs/operations/QUICK_START.md)
+
 ## 문서 지도
 
 - **제품 범위:** [`docs/product/V1_SCOPE.md`](./docs/product/V1_SCOPE.md)
@@ -10,6 +18,7 @@
 - **보안 계약:** [`docs/architecture/SECURITY.md`](./docs/architecture/SECURITY.md)
 - **데이터 소스:** [`docs/architecture/DATA_SOURCES.md`](./docs/architecture/DATA_SOURCES.md)
 - **운영 설치:** [`docs/operations/INSTALL.md`](./docs/operations/INSTALL.md)
+- **바로 사용:** [`docs/operations/QUICK_START.md`](./docs/operations/QUICK_START.md)
 - **Tailscale 배포:** [`docs/operations/TAILSCALE.md`](./docs/operations/TAILSCALE.md)
 - **백업·복구:** [`docs/operations/BACKUP_AND_RECOVERY.md`](./docs/operations/BACKUP_AND_RECOVERY.md)
 - **빌드 마일스톤(정본):** [`.hermes/plans/2026-09-19_140517-hm-os-v1.md`](./.hermes/plans/2026-09-19_140517-hm-os-v1.md)
@@ -18,9 +27,9 @@
 
 ## 현재 상태
 
-V1 `v0.1.0` 완료 — PM2로 API·userspace Tailscale daemon을 관리하고,
+V1 `v0.1.1` 완료 — PM2로 API·userspace Tailscale daemon을 관리하고,
 `https://hm-os-server.taila8b4a0.ts.net`에서 tailnet-only HTTPS PWA로 제공한다.
-릴리스 노트: [`docs/releases/v0.1.0.md`](./docs/releases/v0.1.0.md).
+릴리스 노트: [`docs/releases/v0.1.1.md`](./docs/releases/v0.1.1.md).
 
 ## 개발
 

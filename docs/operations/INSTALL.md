@@ -39,8 +39,10 @@ npm run healthcheck
 ```
 
 PM2는 프로세스 재시작을 담당하지만 이 컨테이너 자체가 재생성되면 `npx pm2 resurrect`가
-필요하다. 호스트/컨테이너 관리자가 재시작 후 이 명령을 호출하도록 설정하기 전까지는
-**컨테이너 재생성까지 보장되는 영구 서비스가 아니다.**
+필요하다. 현재 운영 환경에는 Hermes scheduler의 `hm-os-runtime-watchdog`이 1분마다
+`scripts/ensure-hm-os-running.sh`를 실행하도록 등록되어 있어, PM2 daemon/프로세스,
+userspace Tailscale daemon, Serve 설정을 자동 복구한다. 정상 상태에서는 출력·알림이 없고
+복구 실패만 사용자에게 전달한다.
 
 ## Tailscale Serve
 
