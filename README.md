@@ -1,19 +1,34 @@
-# AI Native OS Notes
+# HM OS
 
-이 저장소는 AI Native OS와 AI Agent 구축을 위한 개인 연구 노트를 모아둔 공간이다.
+이형민의 서버 중심 개인 운영체제(Personal OS) — 2D 픽셀 오피스로 실제 서버·Agent OS·지식
+베이스 상태를 보여주고, Tailscale + PIN 인증 뒤 현재 서버를 직접 제어하는 비공개 PWA.
 
-## 포함 문서
+## 문서 지도
 
-- [AI Native OS reference zip.md](./AI%20Native%20OS%20reference%20zip.md) : Obsidian, Graphify, 웹 클리퍼, 참고 링크를 모은 원자료 메모
-- [AI_Native_Agent_Ecosystem_마스터플랜_1.md](./AI_Native_Agent_Ecosystem_%EB%A7%88%EC%8A%A4%ED%84%B0%ED%94%8C%EB%9E%9C_1.md) : AI Agent OS의 전체 아키텍처와 구축 단계가 정리된 마스터플랜
-- [AI_OS_소스_카탈로그.md](./AI_OS_%EC%86%8C%EC%8A%A4_%EC%B9%B4%ED%83%88%EB%A1%9C%EA%B7%B8.md) : 도구, 프레임워크, 학습 소스를 콘텐츠 성격과 기능으로 분류한 카탈로그
+- **제품 범위:** [`docs/product/V1_SCOPE.md`](./docs/product/V1_SCOPE.md)
+- **시스템 아키텍처:** [`docs/architecture/SYSTEM.md`](./docs/architecture/SYSTEM.md)
+- **보안 계약:** [`docs/architecture/SECURITY.md`](./docs/architecture/SECURITY.md)
+- **데이터 소스:** [`docs/architecture/DATA_SOURCES.md`](./docs/architecture/DATA_SOURCES.md)
+- **빌드 마일스톤(정본):** [`.hermes/plans/2026-09-19_140517-hm-os-v1.md`](./.hermes/plans/2026-09-19_140517-hm-os-v1.md)
+- **기존 연구 자료(원문 보존):** [`docs/legacy/`](./docs/legacy/)
+- **에이전트 작업 계약:** [`AGENTS.md`](./AGENTS.md)
 
-## 목적
+## 현재 상태
 
-- AI Native OS 아키텍처 정리
-- 에이전트/도구/지식 소스 카탈로그화
-- 향후 자동화와 연구 워크플로우의 기준 문서로 활용
+V1 Milestone 0 진행 중 — 저장소 재구성 및 제품 계약 수립 단계.
 
-## 메모
+## 개발
 
-문서 중심 저장소이므로, 새 아이디어나 구조 변경이 생기면 이 README와 마스터플랜 문서를 함께 갱신한다.
+```bash
+npm install
+npm run lint
+npm run typecheck
+npm test
+```
+
+## 보안 원칙 (요약)
+
+- Tailscale 사용자 신원 + HM OS PIN 2단계 인증.
+- API는 `127.0.0.1`에만 바인딩, Tailscale Serve를 통해서만 외부 접속.
+- 모든 제어(터미널/파일)는 현재 서버 프로세스의 Linux 사용자 권한 범위 내로 제한.
+- 자세한 내용은 [`docs/architecture/SECURITY.md`](./docs/architecture/SECURITY.md) 참고.
