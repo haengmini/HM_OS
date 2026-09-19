@@ -18,7 +18,7 @@ declare module 'fastify' {
  */
 export function tailscaleGuard(config: HmOsConfig) {
   return async (req: FastifyRequest, reply: FastifyReply) => {
-    const result = checkTailscaleIdentity(req, config.ownerLoginName, config.expectedHost);
+    const result = checkTailscaleIdentity(req.headers, config.ownerLoginName, config.expectedHost);
     if (!result.ok) {
       reply.code(403).send(result.failure);
       return reply;

@@ -28,8 +28,8 @@ export function registerAuthModule(
     maxFailuresBeforeBackoff: config.maxFailuresBeforeBackoff,
   });
 
-  function requireTailscale(req: Parameters<typeof checkTailscaleIdentity>[0]) {
-    return checkTailscaleIdentity(req, config.ownerLoginName, config.expectedHost);
+  function requireTailscale(req: { headers: Parameters<typeof checkTailscaleIdentity>[0] }) {
+    return checkTailscaleIdentity(req.headers, config.ownerLoginName, config.expectedHost);
   }
 
   function setSessionCookie(reply: import('fastify').FastifyReply, sessionId: string, expiresAt: string) {

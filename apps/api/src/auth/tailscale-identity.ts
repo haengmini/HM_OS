@@ -1,4 +1,3 @@
-import type { FastifyRequest } from 'fastify';
 import type { AuthFailure } from '@hm-os/contracts';
 
 /**
@@ -10,6 +9,10 @@ import type { AuthFailure } from '@hm-os/contracts';
  * combined with loopback-only bind + Tailscale Serve as the only route
  * in, this check narrows requests to genuinely proxied tailnet traffic
  * in production. See docs/architecture/SECURITY.md.
+ *
+ * Accepts a plain headers record so it works identically for Fastify
+ * HTTP requests and raw `http.IncomingMessage` WebSocket upgrade
+ * requests (see realtime/status-stream.ts).
  */
 export interface TailscaleCheckResult {
   ok: boolean;
@@ -17,12 +20,14 @@ export interface TailscaleCheckResult {
   loginName?: string;
 }
 
+export type HeaderLookup = Record<string, string | string[] | undefined>;
+
 export function checkTailscaleIdentity(
-  req: FastifyRequest,
+  headers: HeaderLookup,
   expectedOwnerLogin: string,
   expectedHost: string,
 ): TailscaleCheckResult {
-  const host = req.headers.host;
+  const host = headers.host;
   if (host !== expectedHost) {
     return {
       ok: false,
@@ -33,7 +38,7 @@ export function checkTailscaleIdentity(
     };
   }
 
-  const loginNameHeader = req.headers['tailscale-user-login'];
+  const loginNameHeader = headers['tailscale-user-login'];
   const loginName = Array.isArray(loginNameHeader) ? loginNameHeader[0] : loginNameHeader;
 
   if (!loginName || loginName !== expectedOwnerLogin) {

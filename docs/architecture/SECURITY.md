@@ -58,3 +58,25 @@ Milestone 1 구현 노트:
   "세션과 잠금" 섹션 규칙을 그대로 적용한다.
 - PTY/파일 편집 채널의 실제 잠금-시 강제 종료는 Milestone 4에서 구현되므로 아직 대상 채널이
   없다(터미널/파일 라우트가 아직 없음).
+
+Milestone 2 구현 노트 — WebSocket 업그레이드 처리 방식:
+- **발견한 이슈:** `@fastify/websocket@11.3.1`을 Fastify 5.12.5 + Node 26.5.1 조합에서
+  route-hijack 방식(`{ websocket: true }` 옵션)으로 등록했을 때, 라우트 핸들러의 첫 번째
+  인자로 실제 `ws.WebSocket` 소켓이 아니라 Fastify 내부의 `_Request` 객체가 전달되는 것을
+  실제 서버 기동 후 최소 재현 스크립트로 확인했다(`socket.send is not a function`,
+  `socket.close is not a function`). 원인은 이 특정 버전 조합에서의 라이브러리 통합 버그로
+  보이며, 별도 이슈 리포트 없이 우회하기로 결정했다.
+- **우회 방법:** `@fastify/websocket` 의존성을 제거하고, `ws` 패키지의
+  `WebSocketServer({ noServer: true })`를 Fastify의 기반 Node `http.Server`
+  (`app.server`)의 `upgrade` 이벤트에 직접 연결하는 방식으로 전환했다
+  (`apps/api/src/realtime/status-stream.ts`의 `attachStatusStream`).
+  Tailscale 신원 검사(`checkTailscaleIdentity`)와 세션 조회(`sessionStore.get`)를
+  업그레이드 단계에서 직접 수행해 실패 시 소켓을 HTTP 응답(403/401)으로 거부한 뒤
+  destroy한다. `checkTailscaleIdentity`는 이 재사용을 위해 Fastify `FastifyRequest` 대신
+  일반 헤더 레코드(`HeaderLookup`)를 받도록 리팩터링했다.
+- **실제 검증(진짜 서버 기동 + 진짜 WebSocket 클라이언트로 확인):**
+  - 정상 세션 → `office-status` 이벤트 스트림 정상 수신(2회 연속 각 17개 이벤트)
+  - `/api/auth/lock` 호출 후 같은 쿠키로 재연결 시도 → 업그레이드 단계에서 401 거부
+  - 잘못된 Host 헤더로 연결 시도 → 업그레이드 단계에서 403 거부
+- 이 패턴(`WebSocketServer({ noServer: true })` + 수동 `upgrade` 핸들러)이 Milestone 4의
+  PTY 터미널·파일 편집 WebSocket 채널에도 그대로 재사용될 정본 구현이다.
