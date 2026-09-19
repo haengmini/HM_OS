@@ -10,3 +10,7 @@ coverage/
 *.sqlite-journal
 *.tsbuildinfo
 apps/api/data/
+config/hm-os.env
+.pm2/
+**/test-results/
+**/playwright-report/

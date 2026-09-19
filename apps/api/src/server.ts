@@ -5,6 +5,7 @@ import { loadAdapterConfig } from './adapters/config.js';
 import { registerAuthModule } from './routes/auth.js';
 import { registerStatusRoutes } from './routes/status.js';
 import { registerFileRoutes } from './routes/files.js';
+import { registerWebApp } from './routes/web-app.js';
 import { attachStatusStream } from './realtime/status-stream.js';
 import { attachTerminalStream } from './realtime/terminal-stream.js';
 import { AuditLog } from './audit/audit-log.js';
@@ -38,12 +39,16 @@ export function buildServer() {
   app.get('/healthz', async () => ({
     status: 'ok',
     service: 'hm-os-api',
-    milestone: 'M4',
+    milestone: 'M5',
   }));
 
   const { sessionStore, pinStore } = registerAuthModule(app, config);
   registerStatusRoutes(app, adapterConfig, sessionStore);
   registerFileRoutes(app, config.filesRoot, sessionStore, auditLog);
+  app.register(async (webApp) => {
+    const webDist = new URL('../../web/dist/', import.meta.url).pathname;
+    await registerWebApp(webApp, webDist);
+  });
 
   let streamsAttached = false;
   function attachStreamsOnce() {
