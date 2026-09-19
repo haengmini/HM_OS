@@ -28,6 +28,10 @@ export interface HmOsConfig {
   cookieSecure: boolean;
   /** Max failed PIN attempts before exponential backoff kicks in. */
   maxFailuresBeforeBackoff: number;
+  /** Root directory the file browser/editor is scoped to (never escapable). */
+  filesRoot: string;
+  /** Working directory new PTY terminal sessions start in. */
+  terminalCwd: string;
 }
 
 function envInt(name: string, fallback: number): number {
@@ -44,6 +48,7 @@ function envBool(name: string, fallback: boolean): boolean {
 }
 
 export function loadConfig(): HmOsConfig {
+  const homeDir = process.env.HOME ?? '/opt/data';
   return {
     ownerLoginName: process.env.HM_OS_OWNER_LOGIN ?? 'ihyeongmin00@gmail.com',
     expectedHost: process.env.HM_OS_TAILNET_HOSTNAME ?? 'hm-os-server.taila8b4a0.ts.net',
@@ -52,5 +57,7 @@ export function loadConfig(): HmOsConfig {
     idleLockMs: envInt('HM_OS_IDLE_LOCK_MS', 10 * 60 * 1000),
     cookieSecure: envBool('HM_OS_COOKIE_SECURE', true),
     maxFailuresBeforeBackoff: envInt('HM_OS_MAX_FAILURES_BEFORE_BACKOFF', 3),
+    filesRoot: process.env.HM_OS_FILES_ROOT ?? homeDir,
+    terminalCwd: process.env.HM_OS_TERMINAL_CWD ?? homeDir,
   };
 }

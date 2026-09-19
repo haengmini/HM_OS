@@ -80,3 +80,35 @@ Milestone 2 구현 노트 — WebSocket 업그레이드 처리 방식:
   - 잘못된 Host 헤더로 연결 시도 → 업그레이드 단계에서 403 거부
 - 이 패턴(`WebSocketServer({ noServer: true })` + 수동 `upgrade` 핸들러)이 Milestone 4의
   PTY 터미널·파일 편집 WebSocket 채널에도 그대로 재사용될 정본 구현이다.
+
+## 검증 체크리스트 (Milestone 4 게이트)
+
+- [x] 세션 없이 파일 라우트 접근 → 401
+- [x] path escape 시도(`../../etc/passwd`) → 403 (`path_escape`)
+- [x] 존재하지 않는 파일 읽기 → 404
+- [x] 파일 write/read/move/delete 실제 왕복 검증(HTTP inject + 실제 서버 curl 둘 다)
+- [x] 바이너리 upload/download 바이트 단위 동일성 검증(`cmp`로 실제 확인)
+- [x] 세션 잠금 후 새 터미널 WebSocket 연결 시도 → 업그레이드 단계에서 401 거부
+- [x] 감사 로그에 파일 내용·PIN·세션 토큰 원문이 기록되지 않음(자동 테스트 + 실제 로그 파일
+      직접 확인)
+
+Milestone 4 구현 노트:
+- `apps/api/src/terminal/pty-session.ts` — `node-pty` 래퍼. 이 서버(Node 26.5.1)에서
+  프리빌드 바이너리가 정상 동작함을 실제 빌드 후 확인(별도 대체 라이브러리 불필요).
+- `apps/api/src/realtime/terminal-stream.ts` — Milestone 2와 동일한 수동
+  `WebSocketServer({ noServer: true })` + `upgrade` 패턴 재사용. Tailscale 신원 +
+  세션을 업그레이드 단계에서 검증하고, 연결 유지 중에도 `lockCheckIntervalMs`(기본 2초)
+  주기로 세션을 재검사해 잠금·만료 시 PTY를 kill하고 소켓을 닫는다.
+- `apps/api/src/files/path-safety.ts` — 모든 파일 경로 연산의 단일 통로. `..` 상대 경로
+  탈출을 텍스트 레벨에서 차단(symlink 실제 해석은 하지 않음 — 알려진 범위 제한).
+- `apps/api/src/files/file-service.ts` — list/read/write/mkdir/move/delete와 별도의
+  raw read/write(업로드·다운로드용, UTF-8 디코딩 없이 바이트 그대로).
+- `apps/api/src/audit/audit-log.ts` — 파일/터미널 액션마다 append-only JSON 라인 기록.
+  타입 시스템으로 필드를 제한해 파일 내용·명령 원문이 실수로 로그에 들어갈 수 없게 함.
+- **실제 검증(진짜 서버 + 진짜 HTTP/WebSocket 클라이언트, 실제 파일시스템 대상)**:
+  실제 서버를 `/tmp` 경로(files root)를 대상으로 기동 → curl로 list/read/write/upload/
+  download 전부 실제 파일시스템에 반영됨을 `cat`/`cmp`로 직접 확인 → `ws` 클라이언트로
+  `/api/terminal`에 연결해 실제 bash PTY에서 `pwd && echo <marker>`를 실행, 출력 스트림에
+  설정된 cwd와 marker가 그대로 나타남을 확인 → `/api/auth/lock` 호출 후 같은 쿠키로 새
+  터미널 연결 시도 시 401 거부 확인 → 실행된 모든 액션이 `audit.log`에 경로만 기록되고
+  파일 내용("SENSITIVE CONTENT MARKER" 등 테스트 마커)은 전혀 포함되지 않음을 확인.
