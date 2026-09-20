@@ -20,7 +20,7 @@ async function authenticate(page: import('@playwright/test').Page) {
 
 test('authenticates and renders the real pixel-office rooms', async ({ page }) => {
   await authenticate(page);
-  for (const room of ['관제실', '에이전트 작업실', '도서관', '프로젝트룸']) {
+  for (const room of ['관제실', '에이전트 길드', '지식 도서관', '프로젝트 공방', '터미널 게이트']) {
     await expect(page.getByText(room, { exact: true })).toBeVisible();
   }
 });
@@ -28,12 +28,13 @@ test('authenticates and renders the real pixel-office rooms', async ({ page }) =
 test('opens a real PTY terminal and file editor', async ({ page }) => {
   await authenticate(page);
 
-  await page.getByRole('button', { name: '터미널' }).click();
+  const appDock = page.getByRole('navigation', { name: 'HM OS 기능' });
+  await appDock.getByRole('button', { name: /터미널/ }).click();
   const terminalRegion = page.getByRole('region', { name: '서버 터미널' });
   await expect(terminalRegion).toBeVisible();
   await expect(terminalRegion.getByText('연결됨', { exact: true })).toBeVisible({ timeout: 15_000 });
 
-  await page.getByRole('button', { name: '파일' }).click();
+  await appDock.getByRole('button', { name: /파일/ }).click();
   await expect(page.getByRole('region', { name: '파일 탐색기' })).toBeVisible();
   await page.getByRole('button', { name: /e2e\.txt/ }).first().click();
   const editor = page.locator('.hm-os-file-editor textarea');

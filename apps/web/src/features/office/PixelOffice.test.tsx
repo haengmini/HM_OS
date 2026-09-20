@@ -52,10 +52,13 @@ describe('PixelOffice', () => {
     render(<PixelOffice />);
 
     expect(screen.getByText('관제실')).toBeInTheDocument();
-    expect(screen.getByText('에이전트 작업실')).toBeInTheDocument();
-    expect(screen.getByText('도서관')).toBeInTheDocument();
-    expect(screen.getByText('프로젝트룸')).toBeInTheDocument();
-    expect(screen.getByText('터미널룸 (Milestone 4)')).toBeInTheDocument();
+    expect(screen.getByText('에이전트 길드')).toBeInTheDocument();
+    expect(screen.getByText('지식 도서관')).toBeInTheDocument();
+    expect(screen.getByText('프로젝트 공방')).toBeInTheDocument();
+    expect(screen.getByText('터미널 게이트')).toBeInTheDocument();
+
+    expect(screen.getByText('Agent Operations HQ')).toBeInTheDocument();
+    expect(screen.getByText('ENTITY')).toBeInTheDocument();
 
     await waitFor(() => expect(screen.getByText('server-main')).toBeInTheDocument());
     expect(screen.getByText('coder')).toBeInTheDocument();

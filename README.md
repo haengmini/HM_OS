@@ -17,6 +17,7 @@
 - **시스템 아키텍처:** [`docs/architecture/SYSTEM.md`](./docs/architecture/SYSTEM.md)
 - **보안 계약:** [`docs/architecture/SECURITY.md`](./docs/architecture/SECURITY.md)
 - **데이터 소스:** [`docs/architecture/DATA_SOURCES.md`](./docs/architecture/DATA_SOURCES.md)
+- **픽셀 오피스 디자인:** [`docs/design/PIXEL_OFFICE.md`](./docs/design/PIXEL_OFFICE.md)
 - **운영 설치:** [`docs/operations/INSTALL.md`](./docs/operations/INSTALL.md)
 - **바로 사용:** [`docs/operations/QUICK_START.md`](./docs/operations/QUICK_START.md)
 - **Tailscale 배포:** [`docs/operations/TAILSCALE.md`](./docs/operations/TAILSCALE.md)
@@ -27,9 +28,9 @@
 
 ## 현재 상태
 
-V1 `v0.1.1` 완료 — PM2로 API·userspace Tailscale daemon을 관리하고,
+Pixel Office `v0.2.0` 완료 — PM2로 API·userspace Tailscale daemon을 관리하고,
 `https://hm-os-server.taila8b4a0.ts.net`에서 tailnet-only HTTPS PWA로 제공한다.
-릴리스 노트: [`docs/releases/v0.1.1.md`](./docs/releases/v0.1.1.md).
+릴리스 노트: [`docs/releases/v0.2.0.md`](./docs/releases/v0.2.0.md).
 
 ## 개발
 

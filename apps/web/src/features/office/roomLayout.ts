@@ -15,14 +15,16 @@ export interface RoomDefinition {
   title: string;
   koreanSubtitle: string;
   source: OfficeSource | null;
+  icon: string;
+  accent: string;
 }
 
 export const ROOM_DEFINITIONS: readonly RoomDefinition[] = [
-  { id: 'control-room', title: 'Control Room', koreanSubtitle: '관제실', source: 'system' },
-  { id: 'agent-workshop', title: 'Agent Workshop', koreanSubtitle: '에이전트 작업실', source: 'agent-os' },
-  { id: 'library', title: 'Library', koreanSubtitle: '도서관', source: 'wiki' },
-  { id: 'project-room', title: 'Project Room', koreanSubtitle: '프로젝트룸', source: 'recent-docs' },
-  { id: 'terminal-room', title: 'Terminal Room', koreanSubtitle: '터미널룸 (Milestone 4)', source: null },
+  { id: 'control-room', title: 'SYSTEM CORE', koreanSubtitle: '관제실', source: 'system', icon: '◆', accent: '#52d6c8' },
+  { id: 'agent-workshop', title: 'AGENT GUILD', koreanSubtitle: '에이전트 길드', source: 'agent-os', icon: '♟', accent: '#ff9f68' },
+  { id: 'library', title: 'KNOWLEDGE VAULT', koreanSubtitle: '지식 도서관', source: 'wiki', icon: '▥', accent: '#c4a7ff' },
+  { id: 'project-room', title: 'QUEST STUDIO', koreanSubtitle: '프로젝트 공방', source: 'recent-docs', icon: '⚒', accent: '#ffd166' },
+  { id: 'terminal-room', title: 'CONTROL GATE', koreanSubtitle: '터미널 게이트', source: null, icon: '>_', accent: '#7dd3fc' },
 ] as const;
 
 export function roomForSource(source: OfficeSource): RoomDefinition {

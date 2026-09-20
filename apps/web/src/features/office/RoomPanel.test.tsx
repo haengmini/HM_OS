@@ -28,11 +28,13 @@ describe('RoomPanel', () => {
   it('filters out events from other sources', () => {
     render(<RoomPanel room={controlRoom} events={[makeEvent({ source: 'wiki', entityId: 'second-brain' })]} />);
     expect(screen.queryByText('second-brain')).not.toBeInTheDocument();
-    expect(screen.getByText('데이터 대기 중...')).toBeInTheDocument();
+    expect(screen.getByText('데이터 신호를 기다리는 중...')).toBeInTheDocument();
   });
 
-  it('shows the Milestone 4 placeholder for the reserved terminal room', () => {
+  it('shows live terminal and file controls in the control gate', () => {
     render(<RoomPanel room={terminalRoom} events={[]} />);
-    expect(screen.getByText('Milestone 4에서 활성화됩니다.')).toBeInTheDocument();
+    expect(screen.getByText('SERVER LINK ESTABLISHED')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '터미널 진입' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '파일 보관소' })).toBeInTheDocument();
   });
 });
