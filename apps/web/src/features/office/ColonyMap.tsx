@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent } from 'react';
 import type { DevicePresence, DeviceProfileId, OfficeStatusEvent } from '@hm-os/contracts';
 import {
-  COLONY_OBJECTS, COLONY_ZONES, MAP_HEIGHT, MAP_WIDTH, findPath, isWalkable,
+  COLONY_OBJECTS, COLONY_ZONES, DECORATIONS, MAP_HEIGHT, MAP_WIDTH, findPath, isWalkable,
   nearestInteraction, spawnForSource, type ColonyObject, type TilePoint,
 } from './colonyMap.js';
 import { useDevicePresence } from './useDevicePresence.js';
@@ -13,7 +13,20 @@ interface ColonyMapProps {
 }
 
 type Facing = DevicePresence['facing'];
+type Direction = 'up' | 'down' | 'left' | 'right';
 const START: TilePoint = { x: 14, y: 9 };
+/** Constant tick length for every step, whether by held key or clicked path.
+ * A single fixed-rate game loop (instead of relying on native OS key-repeat,
+ * which starts with a long delay then fires rapidly) keeps walking speed
+ * even and unhurried instead of accelerating the longer a key is held. */
+const TICK_MS = 220;
+const DIRECTION_KEYS: Record<string, Direction> = {
+  ArrowUp: 'up', w: 'up', W: 'up',
+  ArrowDown: 'down', s: 'down', S: 'down',
+  ArrowLeft: 'left', a: 'left', A: 'left',
+  ArrowRight: 'right', d: 'right', D: 'right',
+};
+const DELTAS: Record<Direction, [number, number]> = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 const positionStyle = (point: TilePoint) => ({ left: `${point.x / MAP_WIDTH * 100}%`, top: `${point.y / MAP_HEIGHT * 100}%` });
 
 export function ColonyMap({ events, deviceId, onInteract }: ColonyMapProps) {
@@ -21,47 +34,69 @@ export function ColonyMap({ events, deviceId, onInteract }: ColonyMapProps) {
   const [facing, setFacing] = useState<Facing>('down');
   const [walking, setWalking] = useState(false);
   const pathRef = useRef<TilePoint[]>([]);
+  const heldRef = useRef<Set<Direction>>(new Set());
   const devices = useDevicePresence(deviceId, position, facing);
   const interaction = nearestInteraction(position);
 
-  const move = useCallback((dx: number, dy: number) => {
+  const stepOnce = useCallback((dx: number, dy: number) => {
     pathRef.current = [];
+    let moved = false;
     setPosition((current) => {
       const next = { x: current.x + dx, y: current.y + dy };
-      return isWalkable(next) ? next : current;
+      if (!isWalkable(next)) return current;
+      moved = true;
+      return next;
     });
     setFacing(dx < 0 ? 'left' : dx > 0 ? 'right' : dy < 0 ? 'up' : 'down');
     setWalking(true);
-    window.setTimeout(() => setWalking(false), 180);
+    return moved;
   }, []);
 
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
+    const onKeyDown = (event: KeyboardEvent) => {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
-      const direction: Record<string, [number, number]> = {
-        ArrowUp: [0, -1], w: [0, -1], W: [0, -1], ArrowDown: [0, 1], s: [0, 1], S: [0, 1],
-        ArrowLeft: [-1, 0], a: [-1, 0], A: [-1, 0], ArrowRight: [1, 0], d: [1, 0], D: [1, 0],
-      };
-      const selected = direction[event.key];
-      if (selected) { event.preventDefault(); move(selected[0], selected[1]); }
+      const direction = DIRECTION_KEYS[event.key];
+      if (direction) { event.preventDefault(); heldRef.current.add(direction); }
       if ((event.key === 'e' || event.key === 'E' || event.key === 'Enter') && interaction) onInteract(interaction);
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [interaction, move, onInteract]);
+    const onKeyUp = (event: KeyboardEvent) => {
+      const direction = DIRECTION_KEYS[event.key];
+      if (direction) heldRef.current.delete(direction);
+    };
+    const clearHeld = () => heldRef.current.clear();
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', clearHeld);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', clearHeld);
+    };
+  }, [interaction, onInteract]);
 
+  // Single fixed-rate loop drives both click-to-walk paths and held-key
+  // movement, one tile per tick, so speed never ramps up over time.
   useEffect(() => {
     const timer = window.setInterval(() => {
-      const next = pathRef.current.shift();
-      if (!next) { setWalking(false); return; }
-      setPosition((current) => {
-        setFacing(next.x < current.x ? 'left' : next.x > current.x ? 'right' : next.y < current.y ? 'up' : 'down');
-        return next;
-      });
-      setWalking(true);
-    }, 130);
+      if (pathRef.current.length > 0) {
+        const next = pathRef.current.shift()!;
+        setPosition((current) => {
+          setFacing(next.x < current.x ? 'left' : next.x > current.x ? 'right' : next.y < current.y ? 'up' : 'down');
+          return next;
+        });
+        setWalking(true);
+        return;
+      }
+      const direction = heldRef.current.values().next().value as Direction | undefined;
+      if (direction) {
+        const [dx, dy] = DELTAS[direction];
+        stepOnce(dx, dy);
+        return;
+      }
+      setWalking(false);
+    }, TICK_MS);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [stepOnce]);
 
   const clickMap = (event: MouseEvent<HTMLDivElement>) => {
     if ((event.target as HTMLElement).closest('button,[data-map-object]')) return;
@@ -83,18 +118,24 @@ export function ColonyMap({ events, deviceId, onInteract }: ColonyMapProps) {
   }, [events]);
 
   return (
-    <section className="hm-os-colony-wrap" aria-label="HM OS 콜로니 맵">
+    <section className="hm-os-colony-wrap" aria-label="HM OS 마을 지도">
       <div className="hm-os-colony-map" onClick={clickMap} role="application" aria-label="WASD, 방향키 또는 클릭으로 이동">
         <div className="hm-os-colony-ground" aria-hidden="true" />
+        <div className="hm-os-colony-river" aria-hidden="true" />
+        <div className="hm-os-colony-bridge" aria-hidden="true" />
         {COLONY_ZONES.map((zone) => (
           <div key={zone.id} className={`hm-os-colony-zone zone-${zone.id}`} style={{
             left: `${zone.x / MAP_WIDTH * 100}%`, top: `${zone.y / MAP_HEIGHT * 100}%`,
             width: `${zone.width / MAP_WIDTH * 100}%`, height: `${zone.height / MAP_HEIGHT * 100}%`,
             '--zone-accent': zone.accent,
-          } as CSSProperties}><span>{zone.label}</span></div>
+          } as CSSProperties}><span>{zone.koreanLabel} · {zone.label}</span></div>
         ))}
         <div className="hm-os-colony-road road-horizontal" aria-hidden="true" />
         <div className="hm-os-colony-road road-vertical" aria-hidden="true" />
+
+        {DECORATIONS.map((deco) => (
+          <div key={deco.id} className={`hm-os-colony-deco ${deco.solid ? 'deco-tree' : 'deco-plant'}`} style={positionStyle(deco)} aria-hidden="true">{deco.glyph}</div>
+        ))}
 
         {COLONY_OBJECTS.map((object) => (
           <button key={object.id} type="button" data-map-object={object.kind} className={`hm-os-map-object object-${object.kind}`} style={{
@@ -118,10 +159,10 @@ export function ColonyMap({ events, deviceId, onInteract }: ColonyMapProps) {
 
       {interaction && <button className="hm-os-interaction-prompt" type="button" onClick={() => onInteract(interaction)}><kbd>E</kbd><span>{interaction.label}</span></button>}
       <div className="hm-os-mobile-controls" aria-label="이동 조작">
-        <button onClick={() => move(0, -1)} aria-label="위로">▲</button>
-        <button onClick={() => move(-1, 0)} aria-label="왼쪽">◀</button>
-        <button onClick={() => move(1, 0)} aria-label="오른쪽">▶</button>
-        <button onClick={() => move(0, 1)} aria-label="아래로">▼</button>
+        <button onClick={() => stepOnce(0, -1)} aria-label="위로">▲</button>
+        <button onClick={() => stepOnce(-1, 0)} aria-label="왼쪽">◀</button>
+        <button onClick={() => stepOnce(1, 0)} aria-label="오른쪽">▶</button>
+        <button onClick={() => stepOnce(0, 1)} aria-label="아래로">▼</button>
         <button className="action" disabled={!interaction} onClick={() => interaction && onInteract(interaction)}>E</button>
       </div>
     </section>

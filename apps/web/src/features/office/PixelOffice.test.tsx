@@ -54,8 +54,8 @@ describe('PixelOffice', () => {
     render(<PixelOffice />);
 
     expect(screen.getByRole('application', { name: /WASD/ })).toBeInTheDocument();
-    expect(screen.getByText('SYSTEM CORE')).toBeInTheDocument();
-    expect(screen.getByText('AGENT GUILD')).toBeInTheDocument();
+    expect(screen.getByText(/TOWN HALL/)).toBeInTheDocument();
+    expect(screen.getByText(/RESIDENT SERVICES/)).toBeInTheDocument();
     expect(document.querySelector('[data-map-object="terminal"]')).toBeInTheDocument();
     expect(document.querySelector('[data-map-object="chat"]')).toBeInTheDocument();
 

@@ -59,9 +59,9 @@ export function HermesChat({ onClose }: { onClose: () => void }) {
 
   return (
     <section className="hm-os-chat-panel" aria-label="Hermes 대화">
-      <header><div><span className="hm-os-chat-avatar">H</span><div><b>Hermes</b><small>COLONY AI · ONLINE</small></div></div><button type="button" onClick={onClose} aria-label="대화 닫기">×</button></header>
+      <header><div><span className="hm-os-chat-avatar">H</span><div><b>Hermes</b><small>VILLAGE AI · ONLINE</small></div></div><button type="button" onClick={onClose} aria-label="대화 닫기">×</button></header>
       <div className="hm-os-chat-log" aria-live="polite">
-        {messages.length === 0 && <div className="hm-os-chat-welcome"><b>안녕하세요, 형민님.</b><p>콜로니에서 무엇을 함께 할까요?</p></div>}
+        {messages.length === 0 && <div className="hm-os-chat-welcome"><b>안녕하세요, 형민님.</b><p>마을에서 무엇을 함께 할까요?</p></div>}
         {messages.map((message) => <article key={message.id} data-role={message.role}><span>{message.role === 'assistant' ? 'H' : 'YOU'}</span><p>{message.content || (busy ? '...' : '')}</p></article>)}
         {tool && <div className="hm-os-chat-tool">⚙ {tool}</div>}<div ref={endRef} />
       </div>

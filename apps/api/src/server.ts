@@ -41,7 +41,7 @@ export function buildServer() {
   app.get('/healthz', async () => ({
     status: 'ok',
     service: 'hm-os-api',
-    milestone: 'M6',
+    milestone: 'M6-village',
   }));
 
   const { sessionStore, pinStore } = registerAuthModule(app, config);

@@ -24,8 +24,8 @@ async function authenticate(page: import('@playwright/test').Page) {
 
 test('authenticates, creates a device colonist, and renders one continuous map', async ({ page }) => {
   await authenticate(page);
-  for (const zone of ['SYSTEM CORE', 'AGENT GUILD', 'KNOWLEDGE VAULT', 'QUEST STUDIO', 'CONTROL BAY']) {
-    await expect(page.getByText(zone, { exact: true })).toBeVisible();
+  for (const zone of ['TOWN HALL', 'RESIDENT SERVICES', 'MUSEUM', "NOOK'S CRANNY", 'AIRPORT']) {
+    await expect(page.getByText(zone, { exact: false })).toBeVisible();
   }
   await expect(page.getByRole('application', { name: /WASD/ })).toBeVisible();
   await expect(page.locator('.hm-os-device-character[data-current="true"]')).toBeVisible();
