@@ -2,7 +2,7 @@
   "name": "hm-os",
   "private": true,
   "type": "module",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "HM OS — server-centered personal OS: pixel office UI over real Agent OS / system / knowledge state, with Tailscale + PIN gated full control of the current server.",
   "workspaces": [
     "apps/*",

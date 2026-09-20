@@ -32,6 +32,10 @@ export interface HmOsConfig {
   filesRoot: string;
   /** Working directory new PTY terminal sessions start in. */
   terminalCwd: string;
+  /** Loopback Hermes API Server URL. Never exposed to the browser. */
+  hermesApiUrl: string;
+  /** Hermes API Server bearer key. Loaded only in the backend process. */
+  hermesApiKey: string;
 }
 
 function envInt(name: string, fallback: number): number {
@@ -59,5 +63,7 @@ export function loadConfig(): HmOsConfig {
     maxFailuresBeforeBackoff: envInt('HM_OS_MAX_FAILURES_BEFORE_BACKOFF', 3),
     filesRoot: process.env.HM_OS_FILES_ROOT ?? homeDir,
     terminalCwd: process.env.HM_OS_TERMINAL_CWD ?? homeDir,
+    hermesApiUrl: process.env.HM_OS_HERMES_API_URL ?? 'http://127.0.0.1:8642',
+    hermesApiKey: process.env.HM_OS_HERMES_API_KEY ?? '',
   };
 }

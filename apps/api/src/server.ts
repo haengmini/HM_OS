@@ -5,6 +5,8 @@ import { loadAdapterConfig } from './adapters/config.js';
 import { registerAuthModule } from './routes/auth.js';
 import { registerStatusRoutes } from './routes/status.js';
 import { registerFileRoutes } from './routes/files.js';
+import { registerDeviceRoutes } from './routes/devices.js';
+import { registerChatRoutes } from './routes/chat.js';
 import { registerWebApp } from './routes/web-app.js';
 import { attachStatusStream } from './realtime/status-stream.js';
 import { attachTerminalStream } from './realtime/terminal-stream.js';
@@ -45,6 +47,8 @@ export function buildServer() {
   const { sessionStore, pinStore } = registerAuthModule(app, config);
   registerStatusRoutes(app, adapterConfig, sessionStore);
   registerFileRoutes(app, config.filesRoot, sessionStore, auditLog);
+  registerDeviceRoutes(app, sessionStore);
+  registerChatRoutes(app, config, sessionStore);
   app.register(async (webApp) => {
     const webDist = new URL('../../web/dist/', import.meta.url).pathname;
     await registerWebApp(webApp, webDist);

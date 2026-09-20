@@ -16,13 +16,27 @@ async function authenticate(page: import('@playwright/test').Page) {
     await page.getByRole('button', { name: /로그인|잠금 해제/ }).click();
   }
   await expect(page.getByRole('navigation', { name: 'HM OS 기능' })).toBeVisible();
+  const deviceDialog = page.getByRole('dialog', { name: '이 기기의 캐릭터를 선택하세요' });
+  if (await deviceDialog.isVisible().catch(() => false)) {
+    await deviceDialog.getByRole('button', { name: /Acer Nitro · Linux/ }).click();
+  }
 }
 
-test('authenticates and renders the real pixel-office rooms', async ({ page }) => {
+test('authenticates, creates a device colonist, and renders one continuous map', async ({ page }) => {
   await authenticate(page);
-  for (const room of ['관제실', '에이전트 길드', '지식 도서관', '프로젝트 공방', '터미널 게이트']) {
-    await expect(page.getByText(room, { exact: true })).toBeVisible();
+  for (const zone of ['SYSTEM CORE', 'AGENT GUILD', 'KNOWLEDGE VAULT', 'QUEST STUDIO', 'CONTROL BAY']) {
+    await expect(page.getByText(zone, { exact: true })).toBeVisible();
   }
+  await expect(page.getByRole('application', { name: /WASD/ })).toBeVisible();
+  await expect(page.locator('.hm-os-device-character[data-current="true"]')).toBeVisible();
+  await page.keyboard.press('ArrowRight');
+});
+
+test('opens the Hermes NPC chat panel', async ({ page }) => {
+  await authenticate(page);
+  await page.getByRole('navigation', { name: 'HM OS 기능' }).getByRole('button', { name: /Hermes/ }).click();
+  await expect(page.getByRole('region', { name: 'Hermes 대화' })).toBeVisible();
+  await expect(page.getByPlaceholder('Hermes에게 메시지 보내기...')).toBeVisible();
 });
 
 test('opens a real PTY terminal and file editor', async ({ page }) => {

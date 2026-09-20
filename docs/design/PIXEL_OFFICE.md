@@ -5,6 +5,10 @@
 HM OS는 일반 관리자 대시보드가 아니라, 실제 서버·에이전트·지식·프로젝트 상태가
 캐릭터와 공간으로 표현되는 **탑다운 픽셀아트 Agent Operations HQ**다.
 
+**v0.3.0부터**는 방 카드 그리드 대신, RimWorld류 콜로니 시뮬레이션의 공간·동선
+문법(연속 타일 맵 위에서 캐릭터가 걸어 다니며 시설과 상호작용)을 HM OS 스타일로
+재구현한 **하나의 연속된 콜로니 맵**이다. 자산은 복사하지 않았다.
+
 세 레퍼런스에서 가져온 역할은 다음과 같다.
 
 - AionUi: 실제 터미널·파일·에이전트 운영 기능
@@ -34,6 +38,25 @@ HM OS는 일반 관리자 대시보드가 아니라, 실제 서버·에이전트
 - working/executing은 타이핑, researching은 glow, syncing은 walk, error는 shake한다.
 - hover 시 실제 event detail을 말풍선으로 표시한다.
 - `prefers-reduced-motion`에서는 애니메이션을 사실상 비활성화한다.
+
+## 콜로니 맵 (v0.3.0)
+
+- 30×18 타일의 단일 연속 맵. 방 카드 대신 하나의 이어진 공간이다.
+- 5개 구역(SYSTEM CORE / AGENT GUILD / KNOWLEDGE VAULT / QUEST STUDIO /
+  CONTROL BAY)이 도로로 연결된다.
+- 사용자 캐릭터는 `WASD`/방향키, 클릭 경로탐색(BFS), 모바일 방향 패드로 이동한다.
+- 시설 오브젝트(서버 관제, 에이전트 현황판, Hermes NPC, 지식 보관소, 프로젝트
+  보드, 터미널, 파일 보관소)에 가까이 가면 `E` 또는 상호작용 버튼으로 진입한다.
+- Agent OS 이벤트는 실제 상태(working/researching/syncing/error/offline)에 따라
+  맵 위 NPC 캐릭터의 애니메이션으로 표현된다.
+- **기기 캐릭터**: 최초 접속 기기마다 `acer-nitro-windows` /
+  `acer-nitro-linux` / `desktop-windows` / `iphone` 중 하나를 선택한다. 선택은
+  해당 기기 로컬 저장소에만 남고, 접속 중인 모든 기기가 실시간으로 맵에 표시된다.
+  현재 조작 중인 캐릭터에는 `YOU` 표시가 붙는다. 언제든 상단 HUD의 `DEVICE 변경`
+  으로 다시 선택할 수 있다.
+- **Hermes NPC 대화**: 맵의 Hermes 캐릭터(H) 또는 하단 독의 `Hermes` 버튼으로
+  실제 실행 중인 Hermes Agent와 SSE 스트리밍 대화를 나눈다. Hermes API Server
+  자격 증명은 backend 프로세스에만 있으며 브라우저에는 노출되지 않는다.
 
 ## 반응형 규칙
 

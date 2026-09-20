@@ -16,12 +16,14 @@ class FakeWebSocket {
 
 describe('PixelOffice', () => {
   beforeEach(() => {
+    localStorage.setItem('hm-os-device-profile', 'acer-nitro-linux');
     vi.stubGlobal('WebSocket', FakeWebSocket as unknown as typeof WebSocket);
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({
+      vi.fn().mockImplementation(async (input: Parameters<typeof fetch>[0]) => {
+        const url = String(input);
+        if (url.includes('/api/devices')) return { ok: true, json: async () => ({ devices: [] }) };
+        return { ok: true, json: async () => ({
           events: [
             {
               source: 'system',
@@ -39,7 +41,7 @@ describe('PixelOffice', () => {
               confidence: 'fresh',
             },
           ],
-        }),
+        }) };
       }),
     );
   });
@@ -48,17 +50,14 @@ describe('PixelOffice', () => {
     vi.unstubAllGlobals();
   });
 
-  it('renders all five rooms and places real events into the correct room', async () => {
+  it('renders one colony map with real NPCs and interactive facilities', async () => {
     render(<PixelOffice />);
 
-    expect(screen.getByText('관제실')).toBeInTheDocument();
-    expect(screen.getByText('에이전트 길드')).toBeInTheDocument();
-    expect(screen.getByText('지식 도서관')).toBeInTheDocument();
-    expect(screen.getByText('프로젝트 공방')).toBeInTheDocument();
-    expect(screen.getByText('터미널 게이트')).toBeInTheDocument();
-
-    expect(screen.getByText('Agent Operations HQ')).toBeInTheDocument();
-    expect(screen.getByText('ENTITY')).toBeInTheDocument();
+    expect(screen.getByRole('application', { name: /WASD/ })).toBeInTheDocument();
+    expect(screen.getByText('SYSTEM CORE')).toBeInTheDocument();
+    expect(screen.getByText('AGENT GUILD')).toBeInTheDocument();
+    expect(document.querySelector('[data-map-object="terminal"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-map-object="chat"]')).toBeInTheDocument();
 
     await waitFor(() => expect(screen.getByText('server-main')).toBeInTheDocument());
     expect(screen.getByText('coder')).toBeInTheDocument();

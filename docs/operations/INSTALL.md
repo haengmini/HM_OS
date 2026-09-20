@@ -78,3 +78,15 @@ npm run healthcheck
 
 새 서비스워커가 준비되면 화면 상단의 **새 버전이 준비되었습니다 → 새로고침** 배너로
 교체한다.
+## Hermes 대화 연동 (선택)
+
+`config/hm-os.env`에 다음 두 값을 설정하면 픽셀 오피스 안의 Hermes NPC와
+실제 대화가 가능하다. 값이 없으면 대화 패널은 503으로 안내만 하고 나머지
+기능(콜로니 맵, 터미널, 파일)은 정상 동작한다.
+
+```
+HM_OS_HERMES_API_URL=http://127.0.0.1:8642
+HM_OS_HERMES_API_KEY=<hermes .env의 API_SERVER_KEY 값>
+```
+
+이 값은 HM OS 백엔드 프로세스에만 로드되며 브라우저로 전달되지 않는다.
