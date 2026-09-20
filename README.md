@@ -28,9 +28,9 @@
 
 ## 현재 상태
 
-Village `v0.4.0` 완료 — PM2로 API·userspace Tailscale daemon을 관리하고,
+Lofi Village `v0.5.0` 완료 — PM2로 API·userspace Tailscale daemon을 관리하고,
 `https://hm-os-server.taila8b4a0.ts.net`에서 tailnet-only HTTPS PWA로 제공한다.
-릴리스 노트: [`docs/releases/v0.4.0.md`](./docs/releases/v0.4.0.md).
+릴리스 노트: [`docs/releases/v0.5.0.md`](./docs/releases/v0.5.0.md).
 
 ## 개발
 
