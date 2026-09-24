@@ -1,10 +1,22 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { ThinkingOrb, type OrbState } from 'thinking-orbs';
 
 interface ChatMessage { id: string; role: 'user' | 'assistant'; content: string }
 const STORAGE_KEY = 'hm-os-chat-preview';
 
 function initialMessages(): ChatMessage[] {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]').slice(-20); } catch { return []; }
+}
+
+/** Map Hermes's own busy/tool state onto one of thinking-orbs' nine tuned animations. */
+function orbStateFor(busy: boolean, tool: string): OrbState {
+  if (!busy) return 'breathing';
+  if (!tool) return 'working';
+  const label = tool.toLowerCase();
+  if (label.includes('검색') || label.includes('search') || label.includes('fetch') || label.includes('web')) return 'searching';
+  if (label.includes('파일') || label.includes('file') || label.includes('read') || label.includes('write')) return 'shaping';
+  if (label.includes('연결') || label.includes('api') || label.includes('mcp') || label.includes('http')) return 'connecting';
+  return 'solving';
 }
 
 export function HermesChat({ onClose }: { onClose: () => void }) {
@@ -59,10 +71,10 @@ export function HermesChat({ onClose }: { onClose: () => void }) {
 
   return (
     <section className="hm-os-chat-panel" aria-label="Hermes 대화">
-      <header><div><span className="hm-os-chat-avatar">H</span><div><b>Hermes</b><small>VILLAGE AI · ONLINE</small></div></div><button type="button" onClick={onClose} aria-label="대화 닫기">×</button></header>
+      <header><div><span className="hm-os-chat-avatar"><ThinkingOrb state={orbStateFor(busy, tool)} size={32} paused={!busy} theme="auto" aria-label={busy ? (tool || '작업 중') : 'Hermes 대기 중'} /></span><div><b>Hermes</b><small>GRID AI · ONLINE</small></div></div><button type="button" onClick={onClose} aria-label="대화 닫기">×</button></header>
       <div className="hm-os-chat-log" aria-live="polite">
-        {messages.length === 0 && <div className="hm-os-chat-welcome"><b>안녕하세요, 형민님.</b><p>마을에서 무엇을 함께 할까요?</p></div>}
-        {messages.map((message) => <article key={message.id} data-role={message.role}><span>{message.role === 'assistant' ? 'H' : 'YOU'}</span><p>{message.content || (busy ? '...' : '')}</p></article>)}
+        {messages.length === 0 && <div className="hm-os-chat-welcome"><b>안녕하세요, 형민님.</b><p>콜로니에서 무엇을 함께 할까요?</p></div>}
+        {messages.map((message) => <article key={message.id} data-role={message.role}><span>{message.role === 'assistant' ? <ThinkingOrb state="breathing" size={20} paused theme="auto" aria-label="Hermes" /> : 'YOU'}</span><p>{message.content || (busy ? '...' : '')}</p></article>)}
         {tool && <div className="hm-os-chat-tool">⚙ {tool}</div>}<div ref={endRef} />
       </div>
       <form onSubmit={submit}><textarea value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} placeholder="Hermes에게 메시지 보내기..." rows={2} /><div><small>Enter 전송 · Shift+Enter 줄바꿈</small>{busy ? <button type="button" onClick={() => abortRef.current?.abort()}>중단</button> : <button type="submit" disabled={!input.trim()}>전송</button>}</div></form>

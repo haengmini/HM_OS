@@ -101,11 +101,11 @@
 .hm-os-chat-panel header b,.hm-os-chat-panel header small { display:block; color:var(--village-ink); }
 .hm-os-chat-panel header small { margin-top:3px; color:#96702a; font:5px 'Press Start 2P',monospace; }
 .hm-os-chat-panel header button { color:var(--village-ink); border:0; background:transparent; font-size:25px; cursor:pointer; }
-.hm-os-chat-avatar { display:grid; place-items:center; width:34px; height:34px; color:#40311f; background:#dcb98a; border:3px solid #b5793f; border-radius:50%; font:10px 'Press Start 2P',monospace; }
+.hm-os-chat-avatar { display:grid; place-items:center; width:34px; height:34px; color:#40311f; background:#dcb98a; border:3px solid #b5793f; border-radius:50%; font:10px 'Press Start 2P',monospace; overflow:hidden; }
 .hm-os-chat-log { overflow:auto; padding:12px; background:#f6efdd; }
 .hm-os-chat-welcome { padding:16px; color:#8a7455; text-align:center; border:2px dashed #cbb98a; border-radius:12px; }
 .hm-os-chat-log article { display:grid; grid-template-columns:32px 1fr; gap:7px; margin:9px 0; align-items:start; }
-.hm-os-chat-log article>span { padding-top:5px; color:#96702a; font:6px 'Press Start 2P',monospace; }
+.hm-os-chat-log article>span { padding-top:5px; display:grid; place-items:center; color:#96702a; font:6px 'Press Start 2P',monospace; }
 .hm-os-chat-log article>p { margin:0; padding:9px 12px; white-space:pre-wrap; color:var(--village-ink); border:2px solid #cbb98a; border-radius:14px; background:#e8dabc; line-height:1.48; }
 .hm-os-chat-log article[data-role='user'] { grid-template-columns:1fr 32px; }
 .hm-os-chat-log article[data-role='user']>span { grid-column:2; grid-row:1; color:#b5793f; }
