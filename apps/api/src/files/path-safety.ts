@@ -6,11 +6,9 @@ import { lstat, readlink, realpath } from 'node:fs/promises';
  * rejecting anything that would escape the root after normalization
  * (../, absolute paths, symlink-adjacent tricks via '..' segments).
  *
- * This is the single choke point every file/terminal-cwd operation
- * must go through — see docs/architecture/SECURITY.md "실행 권한 경계".
- * It does not resolve symlinks (that's the caller's job via fs.realpath
- * if needed); it only guarantees the *textual* path cannot escape via
- * '..' traversal.
+ * This synchronous helper is lexical normalization only. File IO must
+ * additionally use resolveSafeFilePath below, which resolves symlink
+ * targets and existing ancestors. Neither helper is an OS sandbox.
  */
 export interface ResolvedPath {
   absolutePath: string;

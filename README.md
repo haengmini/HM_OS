@@ -21,6 +21,7 @@ Agent OS는 역할·지식·작업·검증·반복 운영을 연결하는 환경
 - **시스템 아키텍처:** [`docs/architecture/SYSTEM.md`](./docs/architecture/SYSTEM.md)
 - **Agent OS 현재 구성·포트폴리오 설명:** [`docs/architecture/AGENT_OS.md`](./docs/architecture/AGENT_OS.md)
 - **보안 계약:** [`docs/architecture/SECURITY.md`](./docs/architecture/SECURITY.md)
+- **보안 점검·남은 위험:** [`docs/operations/SECURITY_REVIEW.md`](./docs/operations/SECURITY_REVIEW.md)
 - **데이터 소스:** [`docs/architecture/DATA_SOURCES.md`](./docs/architecture/DATA_SOURCES.md)
 - **픽셀 오피스 디자인:** [`docs/design/PIXEL_OFFICE.md`](./docs/design/PIXEL_OFFICE.md)
 - **운영 설치:** [`docs/operations/INSTALL.md`](./docs/operations/INSTALL.md)

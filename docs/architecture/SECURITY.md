@@ -1,5 +1,22 @@
 # HM OS Security Contract (V1)
 
+## 현재 보안 보강 (2026-10-29)
+
+아래 마일스톤 구현 노트는 과거 검증 이력이다. 현재 소스의 보강 사항과 남은 의존성 위험은
+[보안 점검 기록](../operations/SECURITY_REVIEW.md)을 함께 따른다.
+
+- 모든 `/api` HTTP 경로에 중앙 Tailscale 신원·Host 검사를 적용한다. 보호 라우트의 세션 검사도 유지한다.
+- API 응답은 인증 실패를 포함해 `Cache-Control: no-store`로 처리한다.
+- 자동 presence·상태 조회는 idle 시간을 연장하지 않는다. 인증된 활동 경로와 실제 사용자 입력으로 활동을 갱신한다.
+- 명시적 잠금·로그아웃은 연결된 채팅 upstream과 PTY를 취소한다. 만료는 주기 검사와 출력 전 검사로 차단한다.
+- 채팅 요청은 헤더 대기·본문·스트림을 포함한 시간 제한과 연결 종료 정리를 수행하고 upstream 상세 오류를 노출하지 않는다.
+- 대화 UI는 메모리만 사용하고 과거 평문 브라우저 캐시는 앱 시작 시 제거한다. 서버 측 Hermes 이력은 별도로 유지된다.
+- 감사 로그의 `sessionId`는 원문 세션 토큰이 아니라 SHA-256 해시다. 기존 로그를 임의 삭제·변경하지 않는다.
+- 파일 서비스는 문자열 경로와 실제 symlink 경로를 모두 검사한다. 동일 UID 프로세스의 동시 경로 교체까지 막는 OS 샌드박스는 아니다.
+
+이 계약은 사용자 승인 운영 정책과 앱의 기술적 인증을 구분한다. 현재 인증된 소유자에게 허용된
+터미널·파일 작업마다 추가 승인 UI를 강제하는 설계는 아니며, 새 sudo 권한을 부여하지 않는다.
+
 ## 인증 2단계
 
 1. **Tailscale 사용자 신원**
@@ -54,10 +71,8 @@ Milestone 1 구현 노트:
   `apps/api/src/auth/session-store.ts`, PIN 해시는 `apps/api/src/auth/pin.ts`
   (Argon2id, `@node-rs/argon2`), rate limit은 `apps/api/src/auth/rate-limiter.ts`에 구현.
 - 프런트엔드 잠금 화면은 `apps/web/src/features/auth/{LockScreen,AuthGate,useAuthGate,api}.ts(x)`.
-- WebSocket(터미널/파일) 채널의 세션 재검증은 Milestone 4에서 구현 예정 — 이 문서의
-  "세션과 잠금" 섹션 규칙을 그대로 적용한다.
-- PTY/파일 편집 채널의 실제 잠금-시 강제 종료는 Milestone 4에서 구현되므로 아직 대상 채널이
-  없다(터미널/파일 라우트가 아직 없음).
+- 위 Milestone 1 검증 당시에는 터미널·파일 채널이 없었다. 현재는 Milestone 4 구현과
+  2026-10-29의 세션 무효화 보강을 사용한다.
 
 Milestone 2 구현 노트 — WebSocket 업그레이드 처리 방식:
 - **발견한 이슈:** `@fastify/websocket@11.3.1`을 Fastify 5.12.5 + Node 26.5.1 조합에서
@@ -99,8 +114,9 @@ Milestone 4 구현 노트:
   `WebSocketServer({ noServer: true })` + `upgrade` 패턴 재사용. Tailscale 신원 +
   세션을 업그레이드 단계에서 검증하고, 연결 유지 중에도 `lockCheckIntervalMs`(기본 2초)
   주기로 세션을 재검사해 잠금·만료 시 PTY를 kill하고 소켓을 닫는다.
-- `apps/api/src/files/path-safety.ts` — 모든 파일 경로 연산의 단일 통로. `..` 상대 경로
-  탈출을 텍스트 레벨에서 차단(symlink 실제 해석은 하지 않음 — 알려진 범위 제한).
+- `apps/api/src/files/path-safety.ts` — 문자열 경로와 실제 symlink 대상·부모 경로를 검사한다.
+  새 파일의 누락된 말단과 이동 뒤 상대 링크도 확인한다. 동일 UID 프로세스의 TOCTOU 경쟁까지
+  차단하는 OS 샌드박스는 아니며, 터미널의 OS 권한 자체를 제한하는 기능도 아니다.
 - `apps/api/src/files/file-service.ts` — list/read/write/mkdir/move/delete와 별도의
   raw read/write(업로드·다운로드용, UTF-8 디코딩 없이 바이트 그대로).
 - `apps/api/src/audit/audit-log.ts` — 파일/터미널 액션마다 append-only JSON 라인 기록.
