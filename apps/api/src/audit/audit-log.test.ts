@@ -22,7 +22,8 @@ describe('AuditLog', () => {
     expect(lines).toHaveLength(1);
     const entry = JSON.parse(lines[0]!);
     expect(entry.action).toBe('file_write');
-    expect(entry.sessionId).toBe('sess-1');
+    expect(entry.sessionId).not.toBe('sess-1');
+    expect(entry.sessionId).toMatch(/^[a-f0-9]{64}$/);
     expect(entry.targetPath).toBe('notes/a.md');
     expect(typeof entry.at).toBe('string');
   });
@@ -37,6 +38,19 @@ describe('AuditLog', () => {
     // for a terminal_start entry) — only the fields actually supplied
     // should appear on the wire.
     expect(Object.keys(entry).sort()).toEqual(['action', 'at', 'sessionId', 'targetPath']);
+  });
+
+  it('does not persist a reusable session credential', async () => {
+    dataDir = await mkdtemp(path.join(tmpdir(), 'hm-os-audit-'));
+    const log = new AuditLog(dataDir);
+    const credential = 'synthetic-session-token';
+    await log.record({ action: 'file_read', sessionId: credential, targetPath: 'safe.txt' });
+    await log.record({ action: 'file_read', sessionId: credential, targetPath: 'safe.txt' });
+    const raw = await readFile(path.join(dataDir, 'audit.log'), 'utf8');
+    expect(raw).not.toContain(credential);
+    const entries = raw.trim().split('\n').map((line) => JSON.parse(line));
+    expect(entries[0].sessionId).toMatch(/^[a-f0-9]{64}$/);
+    expect(entries[0].sessionId).toBe(entries[1].sessionId);
   });
 
   it('appends multiple entries in order', async () => {

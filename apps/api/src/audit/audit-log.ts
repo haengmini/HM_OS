@@ -1,4 +1,5 @@
 import { appendFile, mkdir } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 
 /**
@@ -46,7 +47,8 @@ export class AuditLog {
     const line = JSON.stringify({
       at: entry.at ?? new Date().toISOString(),
       action: entry.action,
-      sessionId: entry.sessionId,
+      // Correlate events without writing the reusable bearer credential to disk.
+      sessionId: createHash('sha256').update(entry.sessionId).digest('hex'),
       targetPath: entry.targetPath,
       exitCode: entry.exitCode,
     });
