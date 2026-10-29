@@ -38,7 +38,7 @@ Agent OS는 역할·지식·작업·검증·반복 운영을 연결하는 환경
 
 - React DOM/CSS 연속 타일 맵, 고정 속도 이동·충돌 판정·근접 상호작용.
 - 기기 프로필별 캐릭터와 접속 표시. 다른 기기 자체를 원격 제어하는 기능은 아님.
-- 서버 측 Hermes API 중계를 통한 대화 스트리밍. 이력 조회 중계 API는 있으나 현재 대화 UI는 브라우저의 최근 20개 메시지 캐시를 복원한다.
+- 서버 측 Hermes API 중계를 통한 대화 스트리밍. 현재 대화 UI는 메모리만 사용하며 평문 localStorage 대화 캐시를 저장·복원하지 않는다.
 - 프로필·Kanban, 로컬 Markdown, 프로젝트 최근 파일과 시스템 상태의 읽기 모델.
 - 인증된 현재 서버 PTY 터미널 및 파일 탐색·편집.
 - PM2 기반 API·userspace Tailscale 운영 및 tailnet-only HTTPS PWA.

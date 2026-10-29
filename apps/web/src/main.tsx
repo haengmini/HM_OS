@@ -4,6 +4,10 @@ import '@fontsource/gowun-dodum/400.css';
 import '@fontsource/press-start-2p/400.css';
 import { App } from './App.js';
 import { initServiceWorker } from './registerSW.js';
+import { clearLegacyChatPreview } from './features/chat/chatPrivacy.js';
+
+// Purge the legacy plaintext preview even while the app is still PIN-locked.
+clearLegacyChatPreview();
 
 const container = document.getElementById('root');
 if (!container) {

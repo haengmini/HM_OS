@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { ThinkingOrb, type OrbState } from 'thinking-orbs';
+import { clearLegacyChatPreview } from './chatPrivacy.js';
 
 interface ChatMessage { id: string; role: 'user' | 'assistant'; content: string }
-const STORAGE_KEY = 'hm-os-chat-preview';
-
 function initialMessages(): ChatMessage[] {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]').slice(-20); } catch { return []; }
+  clearLegacyChatPreview();
+  return [];
 }
 
 /** Map Hermes's own busy/tool state onto one of thinking-orbs' nine tuned animations. */
@@ -27,7 +27,7 @@ export function HermesChat({ onClose }: { onClose: () => void }) {
   const abortRef = useRef<AbortController | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-20))); endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
   useEffect(() => () => abortRef.current?.abort(), []);
 
   async function submit(event: FormEvent) {

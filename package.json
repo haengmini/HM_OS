@@ -18,7 +18,8 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "build": "npm run build --workspaces --if-present",
+    "build": "node scripts/build-secure.mjs",
+    "test:security": "node scripts/check-security.mjs",
     "start": "bash scripts/start-hm-os.sh",
     "healthcheck": "bash scripts/healthcheck.sh",
     "test:integration": "npm run test:integration --workspaces --if-present",
@@ -30,7 +31,7 @@
     "@typescript-eslint/parser": "^8.18.0",
     "eslint": "^9.16.0",
     "globals": "^15.13.0",
-    "pm2": "^7.0.4",
+    "pm2": "^7.1.1",
     "typescript": "^5.7.2"
   }
 }

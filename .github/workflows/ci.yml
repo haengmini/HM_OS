@@ -21,10 +21,13 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+      - run: npm run test:security
+      - run: npm run test:integration
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - run: npm audit --audit-level=high
+      - run: npm audit --omit=dev --audit-level=low
       - uses: actions/upload-artifact@v4
         with:
           name: hm-os-build
