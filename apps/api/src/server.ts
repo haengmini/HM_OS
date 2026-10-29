@@ -11,6 +11,7 @@ import { registerWebApp } from './routes/web-app.js';
 import { attachStatusStream } from './realtime/status-stream.js';
 import { attachTerminalStream } from './realtime/terminal-stream.js';
 import { AuditLog } from './audit/audit-log.js';
+import { tailscaleGuard } from './auth/guards.js';
 
 /**
  * Milestone 4: adds real PTY terminal access (WebSocket) and real
@@ -31,6 +32,15 @@ export function buildServer() {
   const auditLog = new AuditLog(config.dataDir);
 
   app.register(cookie);
+  const identityGuard = tailscaleGuard(config);
+  app.addHook('onRequest', async (request, reply) => {
+    const pathname = request.raw.url?.split('?')[0] ?? '';
+    if (pathname === '/api' || pathname.startsWith('/api/')) {
+      reply.header('cache-control', 'no-store');
+      reply.raw.setHeader('cache-control', 'no-store'); // Also covers hijacked streams.
+      return identityGuard(request, reply);
+    }
+  });
 
   // Fastify only parses application/json and text/plain by default;
   // file uploads need the raw bytes untouched.

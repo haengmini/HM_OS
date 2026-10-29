@@ -22,6 +22,24 @@ export interface SessionStoreOptions {
 
 export class SessionStore {
   private readonly sessions = new Map<string, StoredSession>();
+  private readonly invalidationListeners = new Map<string, Set<() => void>>();
+
+  /** Active resources subscribe once and release the subscription on completion. */
+  onInvalidated(sessionId: string, listener: () => void): () => void {
+    const listeners = this.invalidationListeners.get(sessionId) ?? new Set<() => void>();
+    listeners.add(listener);
+    this.invalidationListeners.set(sessionId, listeners);
+    return () => {
+      listeners.delete(listener);
+      if (!listeners.size) this.invalidationListeners.delete(sessionId);
+    };
+  }
+
+  private invalidate(sessionId: string): void {
+    const listeners = this.invalidationListeners.get(sessionId);
+    this.invalidationListeners.delete(sessionId);
+    for (const listener of listeners ?? []) listener();
+  }
 
   constructor(private readonly options: SessionStoreOptions) {}
 
@@ -54,28 +72,31 @@ export class SessionStore {
     if (!session) return undefined;
 
     const now = this.now();
-    if (now.getTime() > new Date(session.expiresAt).getTime()) {
-      this.sessions.delete(sessionId);
+    if (now.getTime() >= new Date(session.expiresAt).getTime()) {
+      this.destroy(sessionId);
       return undefined;
     }
 
     const idleFor = now.getTime() - new Date(session.lastActivityAt).getTime();
-    if (!session.locked && idleFor > this.options.idleLockMs) {
-      session.locked = true;
+    if (!session.locked && idleFor >= this.options.idleLockMs) {
+      this.lock(sessionId);
     }
 
     return session;
   }
 
   touch(sessionId: string): void {
-    const session = this.sessions.get(sessionId);
+    const session = this.get(sessionId);
     if (!session || session.locked) return;
     session.lastActivityAt = this.now().toISOString();
   }
 
   lock(sessionId: string): void {
     const session = this.sessions.get(sessionId);
-    if (session) session.locked = true;
+    if (session && !session.locked) {
+      session.locked = true;
+      this.invalidate(sessionId);
+    }
   }
 
   unlock(sessionId: string): boolean {
@@ -88,6 +109,7 @@ export class SessionStore {
 
   destroy(sessionId: string): void {
     this.sessions.delete(sessionId);
+    this.invalidate(sessionId);
   }
 
   /** Test/ops helper: number of live (non-expired) sessions. */

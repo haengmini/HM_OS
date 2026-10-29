@@ -29,7 +29,7 @@ export function tailscaleGuard(config: HmOsConfig) {
 /**
  * preHandler: requires a valid, non-expired, non-locked session cookie.
  * Attaches the resolved session id to the request for downstream use
- * and refreshes its idle timer.
+ * without treating background requests as user activity.
  */
 export function sessionGuard(sessionStore: SessionStore) {
   return async (req: FastifyRequest, reply: FastifyReply) => {
@@ -50,7 +50,6 @@ export function sessionGuard(sessionStore: SessionStore) {
       return reply;
     }
 
-    sessionStore.touch(sessionId);
     req.hmOsSessionId = sessionId;
   };
 }

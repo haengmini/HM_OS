@@ -95,22 +95,45 @@ function runTerminalSession(
   void auditLog.record({ action: 'terminal_start', sessionId, targetPath: cwd });
   send(ws, { type: 'ready', sessionId: terminalSessionId, cols, rows });
 
-  pty.onData((data) => send(ws, { type: 'output', data }));
-
   let exited = false;
-  pty.onExit(({ exitCode, signal }) => {
-    exited = true;
-    void auditLog.record({ action: 'terminal_exit', sessionId, exitCode });
-    send(ws, { type: 'exit', exitCode, signal });
-    ws.close(1000, 'terminal_exited');
-  });
-
-  const lockCheckTimer = setInterval(() => {
+  let stopped = false;
+  const kill = () => {
+    if (stopped) return;
+    stopped = true; // Block callbacks even if kill synchronously emits output/exit.
+    if (!exited) pty.kill();
+  };
+  const revoke = () => {
+    kill();
+    clearInterval(lockCheckTimer);
+    unsubscribe();
+    ws.close(4401, 'session_expired');
+  };
+  const valid = () => {
+    if (stopped) return false;
     const current = sessionStore.get(sessionId);
     if (!current || current.locked) {
-      ws.close(4401, 'session_expired');
+      revoke();
+      return false;
     }
-  }, lockCheckIntervalMs);
+    return true;
+  };
+  const unsubscribe = sessionStore.onInvalidated(sessionId, revoke);
+  const lockCheckTimer = setInterval(valid, lockCheckIntervalMs);
+
+  pty.onData((data) => {
+    if (valid()) send(ws, { type: 'output', data });
+  });
+  pty.onExit(({ exitCode, signal }) => {
+    exited = true;
+    clearInterval(lockCheckTimer);
+    unsubscribe();
+    void auditLog.record({ action: 'terminal_exit', sessionId, exitCode });
+    if (valid()) {
+      send(ws, { type: 'exit', exitCode, signal });
+      ws.close(1000, 'terminal_exited');
+    }
+    stopped = true;
+  });
 
   ws.on('message', (raw) => {
     let message: TerminalClientMessage;
@@ -120,14 +143,10 @@ function runTerminalSession(
       return; // ignore malformed frames
     }
 
-    const current = sessionStore.get(sessionId);
-    if (!current || current.locked) {
-      ws.close(4401, 'session_expired');
-      return;
-    }
-    sessionStore.touch(sessionId);
+    if (!valid()) return;
 
     if (message.type === 'input') {
+      sessionStore.touch(sessionId);
       pty.write(message.data);
     } else if (message.type === 'resize') {
       pty.resize(message.cols, message.rows);
@@ -136,6 +155,7 @@ function runTerminalSession(
 
   ws.on('close', () => {
     clearInterval(lockCheckTimer);
-    if (!exited) pty.kill();
+    unsubscribe();
+    kill();
   });
 }

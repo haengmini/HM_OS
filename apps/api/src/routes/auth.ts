@@ -165,6 +165,12 @@ export function registerAuthModule(
     return { ok: true };
   });
 
+  // Explicit activity signal: polling must never refresh the idle deadline.
+  app.post('/api/auth/activity', { preHandler: [tailscaleGuard(config), sessionGuard(sessionStore)] }, async (req) => {
+    sessionStore.touch(req.hmOsSessionId!);
+    return { ok: true };
+  });
+
   // Example of a session-protected route for Milestone 1's own tests;
   // Milestone 2+ real routes (status/office-state/terminal/files) use
   // the same `sessionGuard(sessionStore)` preHandler.

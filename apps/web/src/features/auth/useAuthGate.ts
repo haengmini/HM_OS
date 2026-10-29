@@ -63,5 +63,24 @@ export function useAuthGate(pollMs = 15_000): AuthGateState {
     };
   }, [refresh, pollMs]);
 
+  useEffect(() => {
+    if (phase !== 'unlocked') return;
+    let lastSent = 0;
+    const onInput = (event: Event) => {
+      if (!event.isTrusted || document.visibilityState === 'hidden') return;
+      const now = Date.now();
+      if (now - lastSent < 10_000) return;
+      lastSent = now;
+      void fetch('/api/auth/activity', { method: 'POST', credentials: 'same-origin' })
+        .then((response) => { if (!response.ok) void refresh(); })
+        .catch(() => {});
+    };
+    const events = ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart'];
+    for (const event of events) window.addEventListener(event, onInput, { passive: true });
+    return () => {
+      for (const event of events) window.removeEventListener(event, onInput);
+    };
+  }, [phase, refresh]);
+
   return { phase, refresh };
 }
