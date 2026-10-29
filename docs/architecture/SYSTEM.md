@@ -29,7 +29,7 @@ Agent OS는 Hermes, 역할별 프로필, 프로젝트 Kanban, 로컬 Second Brai
 2. `read-model/office-state.ts`가 결과를 공유 `OfficeStatusEvent`로 모은다. 어댑터별 실패는 격리하며 전체 수집 실패를 성공 이벤트로 꾸미지 않는다.
 3. `realtime/status-stream.ts`가 상태를 프런트엔드에 전송한다. `sourcePath`, `observedAt`, `confidence`가 근거와 시각을 전달한다.
 4. 인증된 `/api/devices` 경로로 기기 위치·접속 상태를 교환한다.
-5. `/api/chat`은 서버에서 Hermes API로 요청을 중계하고 SSE 응답을 전달한다. `/api/chat/history`는 별도 HM OS 대화 세션의 기록을 조회한다. 브라우저에는 Hermes API 키를 전달하지 않는다.
+5. `/api/chat`은 서버에서 Hermes API로 요청을 중계하고 SSE 응답을 전달한다. `/api/chat/history`는 별도 HM OS 대화 세션의 이력을 조회하는 중계 API다. 현재 `HermesChat.tsx`는 이 API를 호출하지 않고 브라우저 localStorage의 최근 20개 메시지를 복원한다. 기기 간 전체 이력을 자동 동기화하는 UI가 아니다. 브라우저에는 Hermes API 키를 전달하지 않는다.
 6. 터미널은 인증된 WebSocket의 `node-pty` 세션, 파일 작업은 인증된 HTTP 라우트로 처리한다. 파일 경로는 설정된 루트 안에 제한된다.
 
 ## 저장 상태와 정본
@@ -39,7 +39,7 @@ Agent OS는 Hermes, 역할별 프로필, 프로젝트 Kanban, 로컬 Second Brai
 - HM OS 인증 세션은 메모리에 보관하며 API 프로세스 재시작 후 재인증이 필요하다.
 - 기기 접속 상태도 메모리 저장소다. 기기 프로필 선택은 브라우저 localStorage에 저장한다.
 - PIN 해시는 런타임 데이터 디렉터리의 `pin.json`, 작업 메타데이터는 `audit.log`에 저장한다. 인증·읽기 모델 전체를 HM OS 전용 SQLite에 영속화한다는 초기 설계 설명은 현재 구현과 다르다.
-- 대화 이력은 Hermes 세션 경로를 통해 조회한다. 이는 Second Brain 정본으로 자동 승격되었다는 뜻이 아니다.
+- 서버의 대화 이력 조회 API는 Hermes 세션 경로를 중계한다. 현재 대화 UI의 최근 메시지는 별도의 브라우저 localStorage 캐시다. 어느 쪽도 Second Brain 정본으로 자동 승격되었다는 뜻이 아니다.
 
 `pin.json`, 감사 로그, 세션, 인증 키, 개인 지식 원문은 GitHub에 올리는 소스·문서와 분리한다.
 
@@ -47,6 +47,6 @@ Agent OS는 Hermes, 역할별 프로필, 프로젝트 Kanban, 로컬 Second Brai
 
 API는 `127.0.0.1`에 바인딩하고 Tailscale Serve의 tailnet 전용 HTTPS 뒤에서 사용한다. 등록된 Tailscale 신원과 Host, HM OS PIN·세션으로 접근을 제한한다. API와 userspace Tailscale의 지속 실행 설정은 [운영 설치](../operations/INSTALL.md)를 따른다.
 
-터미널과 파일 기능은 현재 Linux 서버 프로세스의 권한 범위에서만 동작하며 새 sudo/root 권한을 부여하지 않는다. GitHub push, 외부 업로드, 삭제, 시스템 설정·권한 변경은 각각 사용자 승인 경계를 유지한다. 맵·문서 최신화는 서비스 재배포 승인을 대신하지 않는다.
+터미널과 파일 기능은 현재 Linux 서버 프로세스의 권한 범위에서만 동작하며 새 sudo/root 권한을 부여하지 않는다. GitHub push, 외부 업로드, 삭제, 시스템 설정·권한 변경의 사용자 승인 경계는 에이전트 운영 정책이다. HM OS의 인증된 터미널·파일 서비스가 개별 명령마다 추가 승인을 기술적으로 강제하는 것은 아니다. 맵·문서 최신화는 서비스 재배포 승인을 대신하지 않는다.
 
 자세한 보안 계약은 [SECURITY.md](./SECURITY.md)를 따른다.

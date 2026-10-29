@@ -32,7 +32,7 @@ Second Brain 운영환경의 SQLite/FTS·Graphify와 HM OS의 화면 어댑터�
 
 기기 접속은 네 가지 상태 어댑터와 별도 경로다. `routes/devices.ts`와 `devices/device-presence.ts`가 선택한 기기 프로필, 맵 좌표, 방향, 마지막 접속 시각을 메모리에 보관한다. 브라우저는 주기적으로 갱신하며 최근 갱신 여부로 온라인을 판정한다. 서버 재시작 후 복구되는 기기 이력 DB나 원격 장치 관리 시스템은 아니다.
 
-Hermes 대화도 별도 경로다. `routes/chat.ts`가 인증 후 서버 측 설정의 Hermes API를 호출하고 스트리밍 응답과 대화 이력을 중계한다. 키가 없거나 upstream이 실패하면 사용 불가·오류를 반환한다. 이 경로가 동작한다고 모든 Agent OS 전문 프로필이 HM OS NPC로 개별 연결되었다고 볼 수 없다.
+Hermes 대화도 별도 경로다. `routes/chat.ts`가 인증 후 서버 측 설정의 Hermes API를 호출하고 스트리밍 응답과 대화 이력을 중계한다. 현재 대화 UI는 이력 조회 API를 호출하지 않고 브라우저 localStorage에 저장한 최근 20개 메시지를 복원한다. 키가 없거나 upstream이 실패하면 사용 불가·오류를 반환한다. 이 경로가 동작한다고 모든 Agent OS 전문 프로필이 HM OS NPC로 개별 연결되었다고 볼 수 없다.
 
 ## 상태 계약과 실패 해석
 
